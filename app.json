@@ -6,6 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "fitpet",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -19,7 +25,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.spica.FitPet"
+      "package": "com.spica.FitPet",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "fitpet",
+            "host": "oauth"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,7 +43,34 @@
     "extra": {
       "eas": {
         "projectId": "1ef17fca-3cb9-4eb0-ae57-858a3f952dbf"
-      }
-    }
+      },
+      "naverClientId": "rmv8bwoYsbgQn5cifRq7",
+      "naverClientSecret": "DUq5ZNTIY7"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "extraMavenRepos": [
+              "https://devrepo.kakao.com/nexus/content/groups/public/"
+            ]
+          }
+        }
+      ],
+      [
+        "@react-native-kakao/core",
+        {
+          "nativeAppKey": "ac08cd35c42272ec7b5586c128239a4f",
+          "android": {
+            "authCodeHandlerActivity": true
+          },
+          "ios": {
+            "handleKakaoOpenUrl": true
+          }
+        }
+      ]
+    ]
   }
 }
