@@ -22,7 +22,7 @@ const NaverLogin = () => {
   const handleLogin = async () => {
     try {
       console.log("네이버 로그인 시작!");
-      const token = await login(naverKeys);
+      const token = await login(androidKeys);
       console.log("로그인 성공:", token);
       setAccessToken(token.accessToken);
 

@@ -14,8 +14,8 @@ export default function App() {
     <View style={styles.container}>
       {/* <HomeScreen /> */}
       {/* <OnboardingScreen /> */}
-      <KakaoLogin />
-      {/* <NaverLogin /> */}
+      {/* <KakaoLogin /> */}
+      <NaverLogin />
       <StatusBar style="auto" />
     </View>
   );
