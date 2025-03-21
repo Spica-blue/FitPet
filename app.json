@@ -70,6 +70,12 @@
             "handleKakaoOpenUrl": true
           }
         }
+      ],
+      [
+        "@react-native-seoul/naver-login",
+        {
+          "urlScheme": "fitpet"
+        }
       ]
     ]
   }

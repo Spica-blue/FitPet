@@ -3,10 +3,22 @@ import { StyleSheet, Text, View } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import KakaoLogin from "./components/KakaoLogin";
+import Constants from 'expo-constants';
+import NaverLogin from '@react-native-seoul/naver-login';
 import { initializeKakaoSDK } from '@react-native-kakao/core';
-import NaverLogin from './components/NaverLogin';
+import NaverLoginScreen from './components/NaverLoginScreen';
+
+// 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
+const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
+const NAVER_CLIENT_SECRET = Constants.expoConfig?.extra?.naverClientSecret;
+const NAVER_SCHEME = "fitpet"; // app.json에서 설정한 scheme과 일치
 
 initializeKakaoSDK('ac08cd35c42272ec7b5586c128239a4f');
+NaverLogin.initialize({
+  appName: "FitPet",
+  consumerKey: NAVER_CLIENT_ID,
+  consumerSecret: NAVER_CLIENT_SECRET
+});
 
 export default function App() {
 
@@ -14,8 +26,8 @@ export default function App() {
     <View style={styles.container}>
       {/* <HomeScreen /> */}
       {/* <OnboardingScreen /> */}
-      <KakaoLogin />
-      {/* <NaverLogin /> */}
+      {/* <KakaoLogin /> */}
+      <NaverLoginScreen />
       <StatusBar style="auto" />
     </View>
   );
