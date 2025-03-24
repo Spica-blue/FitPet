@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import AppIntroSlider from "react-native-app-intro-slider";
 import styles from "../styles/OnboardingStyle";
 import KakaoLoginButton from "../components/KakaoLoginButton";
+import NaverLoginButton from "../components/NaverLoginButton";
 
 const slides = [
   {
@@ -108,9 +109,10 @@ const OnboardingScreen = ({ onDone }) => {
           <Text style={styles.kakaoButtonText}>카카오로 로그인</Text>
         </TouchableOpacity> */}
         <KakaoLoginButton />
-        <TouchableOpacity style={styles.naverButton} onPress={onDone}>
+        {/* <TouchableOpacity style={styles.naverButton} onPress={onDone}>
           <Text style={styles.naverLoginText}>네이버로 로그인</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <NaverLoginButton />
       </View>
     </View>
   );

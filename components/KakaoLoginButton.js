@@ -14,6 +14,7 @@ const KakaoLoginButton = () => {
     try{
       const user = await kakaoLogin();
       await AsyncStorage.setItem('userInfo', JSON.stringify(user));
+      await AsyncStorage.setItem('loginType', 'kakao');
       navigation.replace("Home"); // Home 화면으로 이동
       // setUserInfo(user);
     } catch(e){}
@@ -36,26 +37,9 @@ const KakaoLoginButton = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* {userInfo ? (
-        <>
-          <Text>닉네임: {userInfo?.kakao_account?.profile?.nickname}</Text>
-          <Text>이메일: {userInfo?.kakao_account?.email}</Text>
-          {userInfo?.kakao_account?.profile?.profile_image_url && (
-            <Image 
-              source={{ uri: userInfo.kakao_account.profile.profile_image_url }} 
-              style={styles.profileImage}
-            />
-          )}
-          <Button title="로그아웃" onPress={handleLogout} />
-          <Button title="연결 끊기" onPress={handleUnlink} color="red" />
-        </> */}
-      {/* // ) : ( */}
-        <TouchableOpacity style={styles.kakaoButton} onPress={handleLogin}>
-          <Text style={styles.kakaoButtonText}>카카오로 로그인</Text>
-        </TouchableOpacity>
-      {/* // )} */}
-    </View>
+    <TouchableOpacity style={styles.kakaoButton} onPress={handleLogin}>
+      <Text style={styles.kakaoButtonText}>카카오로 로그인</Text>
+    </TouchableOpacity>
   );
 }
 
