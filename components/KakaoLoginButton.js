@@ -1,6 +1,6 @@
 import React, {useState}  from "react";
 import { View, Button, Text, Image } from "react-native";
-import { login, logout, unlink } from "@react-native-kakao/user";
+import { kakaoLogin, kakaoLogout, kakaoUnlink } from "../utils/KakaoAuth";
 
 const KakaoLoginButton = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -9,47 +9,25 @@ const KakaoLoginButton = () => {
   const handleLogin = async () => {
     console.log("카카오 로그인 버튼 클릭됨!");
     try{
-      const result = await login(); // 카카오 로그인 실행
-      console.log("로그인 성공:", result);
-
-      // accessToken으로 사용자 정보 요청
-      const response = await fetch("https://kapi.kakao.com/v2/user/me", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${result.accessToken}`,
-          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-        },
-      });
-
-      // 로그인 성공 시, 사용자 정보 가져오기
-      const user = await response.json();
-      console.log("사용자 정보:", user);
+      const user = await kakaoLogin();
       setUserInfo(user);
-    } catch(error){
-      console.error("카카오 로그인 실패:", error);
-    }
+    } catch(e){}
   };
 
   // 로그아웃 함수
   const handleLogout = async () => {
     try{
-      await logout();
-      console.log("로그아웃 성공");
+      await kakaoLogout();
       setUserInfo(null);
-    } catch(error){
-      console.error("로그아웃 실패:", error);
-    }
+    } catch(e){}
   };
 
   // 연결 끊기 (회원 탈퇴)
   const handleUnlink = async () => {
     try{
-      await unlink();
-      console.log("탈퇴 성공");
+      await kakaoUnlink();
       setUserInfo(null);
-    } catch(error){
-      console.error("탈퇴 실패:", error);
-    }
+    } catch(e){}
   };
 
   return (
