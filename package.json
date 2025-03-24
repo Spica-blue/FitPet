@@ -30,7 +30,9 @@
     "react-native": "0.74.5",
     "react-native-app-intro-slider": "^4.0.4",
     "react-native-gesture-handler": "~2.16.1",
-    "react-native-reanimated": "3.10.1"
+    "react-native-reanimated": "3.10.1",
+    "react-native-safe-area-context": "^5.3.0",
+    "react-native-screens": "^4.9.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

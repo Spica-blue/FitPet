@@ -1,16 +1,21 @@
 import React, {useState}  from "react";
-import { View, Button, Text, Image } from "react-native";
+import { View, Button, Text, Image, TouchableOpacity } from "react-native";
 import { kakaoLogin, kakaoLogout, kakaoUnlink } from "../utils/KakaoAuth";
+import styles from "../styles/KakaoLoginButtonStyle";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const KakaoLoginButton = () => {
-  const [userInfo, setUserInfo] = useState(null);
+  // const [userInfo, setUserInfo] = useState(null);
+  const navigation = useNavigation();
 
   // 로그인 함수
   const handleLogin = async () => {
-    console.log("카카오 로그인 버튼 클릭됨!");
     try{
       const user = await kakaoLogin();
-      setUserInfo(user);
+      await AsyncStorage.setItem('userInfo', JSON.stringify(user));
+      navigation.replace("Home"); // Home 화면으로 이동
+      // setUserInfo(user);
     } catch(e){}
   };
 
@@ -18,7 +23,7 @@ const KakaoLoginButton = () => {
   const handleLogout = async () => {
     try{
       await kakaoLogout();
-      setUserInfo(null);
+      // setUserInfo(null);
     } catch(e){}
   };
 
@@ -26,35 +31,30 @@ const KakaoLoginButton = () => {
   const handleUnlink = async () => {
     try{
       await kakaoUnlink();
-      setUserInfo(null);
+      // setUserInfo(null);
     } catch(e){}
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%" }}>
-      {userInfo ? (
+    <View style={styles.container}>
+      {/* {userInfo ? (
         <>
           <Text>닉네임: {userInfo?.kakao_account?.profile?.nickname}</Text>
           <Text>이메일: {userInfo?.kakao_account?.email}</Text>
           {userInfo?.kakao_account?.profile?.profile_image_url && (
             <Image 
               source={{ uri: userInfo.kakao_account.profile.profile_image_url }} 
-              style={{ width: 100, height: 100, borderRadius: 50, marginVertical: 10 }}
+              style={styles.profileImage}
             />
           )}
           <Button title="로그아웃" onPress={handleLogout} />
           <Button title="연결 끊기" onPress={handleUnlink} color="red" />
-        </>
-      ) : (
-        <Button 
-          title="카카오 로그인" 
-          onPress={() => {
-            console.log("카카오 로그인 버튼 눌림"); // 버튼 클릭 시 로그 출력
-            handleLogin();
-          }} 
-          color="#FEE500" 
-        />
-      )}
+        </> */}
+      {/* // ) : ( */}
+        <TouchableOpacity style={styles.kakaoButton} onPress={handleLogin}>
+          <Text style={styles.kakaoButtonText}>카카오로 로그인</Text>
+        </TouchableOpacity>
+      {/* // )} */}
     </View>
   );
 }
