@@ -106,8 +106,8 @@ const OnboardingScreen = ({ onDone }) => {
         <TouchableOpacity style={styles.kakaoButton} onPress={onDone}>
           <Text style={styles.kakaoButtonText}>카카오로 로그인</Text>
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Text style={styles.otherLoginText}>다른 방법으로 로그인</Text>
+        <TouchableOpacity style={styles.naverButton} onPress={onDone}>
+          <Text style={styles.naverLoginText}>네이버로 로그인</Text>
         </TouchableOpacity>
       </View>
     </View>

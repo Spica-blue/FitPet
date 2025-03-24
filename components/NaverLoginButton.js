@@ -3,7 +3,7 @@ import { View, Button, Text, Image } from "react-native";
 import NaverLogin from "@react-native-seoul/naver-login";
 import Constants from "expo-constants";
 
-const NaverLoginScreen = () => {
+const NaverLoginButton = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
 
@@ -85,5 +85,5 @@ const NaverLoginScreen = () => {
   );
 }
 
-export default NaverLoginScreen;
+export default NaverLoginButton;
 

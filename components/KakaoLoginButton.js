@@ -1,8 +1,8 @@
 import React, {useState}  from "react";
-import { View, Button, Text } from "react-native";
+import { View, Button, Text, Image } from "react-native";
 import { login, logout, unlink } from "@react-native-kakao/user";
 
-const KakaoLogin = () => {
+const KakaoLoginButton = () => {
   const [userInfo, setUserInfo] = useState(null);
 
   // 로그인 함수
@@ -58,6 +58,12 @@ const KakaoLogin = () => {
         <>
           <Text>닉네임: {userInfo?.kakao_account?.profile?.nickname}</Text>
           <Text>이메일: {userInfo?.kakao_account?.email}</Text>
+          {userInfo?.kakao_account?.profile?.profile_image_url && (
+            <Image 
+              source={{ uri: userInfo.kakao_account.profile.profile_image_url }} 
+              style={{ width: 100, height: 100, borderRadius: 50, marginVertical: 10 }}
+            />
+          )}
           <Button title="로그아웃" onPress={handleLogout} />
           <Button title="연결 끊기" onPress={handleUnlink} color="red" />
         </>
@@ -75,4 +81,4 @@ const KakaoLogin = () => {
   );
 }
 
-export default KakaoLogin;
+export default KakaoLoginButton;

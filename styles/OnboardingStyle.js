@@ -68,9 +68,18 @@ const OnboardingStyle = StyleSheet.create({
     fontWeight: "bold",
     color: "#3C1E1E",
   },
-  otherLoginText: {
-    fontSize: 14,
-    color: "#888",
+  naverButton: {
+    width: "90%",
+    backgroundColor: "#2DB400",
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  naverLoginText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
   },
 });
 

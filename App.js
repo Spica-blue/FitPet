@@ -2,11 +2,11 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
-import KakaoLogin from "./components/KakaoLogin";
+import KakaoLoginButton from "./components/KakaoLoginButton";
 import Constants from 'expo-constants';
 import NaverLogin from '@react-native-seoul/naver-login';
 import { initializeKakaoSDK } from '@react-native-kakao/core';
-import NaverLoginScreen from './components/NaverLoginScreen';
+import NaverLoginButton from './components/NaverLoginButton';
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
 const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
@@ -26,8 +26,8 @@ export default function App() {
     <View style={styles.container}>
       {/* <HomeScreen /> */}
       {/* <OnboardingScreen /> */}
-      {/* <KakaoLogin /> */}
-      <NaverLoginScreen />
+      <KakaoLoginButton />
+      <NaverLoginButton />
       <StatusBar style="auto" />
     </View>
   );
@@ -37,7 +37,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    // alignItems: 'center',
-    // justifyContent: 'center',
   },
 });
