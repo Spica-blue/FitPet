@@ -65,6 +65,8 @@ export const kakaoUnlink = async () => {
 
     // 서버에 삭제 요청 보내기
     await deleteUserFromServer(email);
+
+    await AsyncStorage.removeItem("userInfo");
   } catch (error) {
     console.error("탈퇴 실패:", error);
     throw error;
