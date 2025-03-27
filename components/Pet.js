@@ -7,7 +7,7 @@ const Pet = () => {
   return(
     <View style={styles.container}>
       <LottieView
-        source={require("../assets/pet/LottieLego.json")}
+        source={require("../assets/pet/happy_dog.json")}
         autoPlay
         loop
         style={styles.animation}
