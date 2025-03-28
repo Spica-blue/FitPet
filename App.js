@@ -28,9 +28,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} /> */}
-        <Stack.Screen name="Pet" component={Pet} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
