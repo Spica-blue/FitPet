@@ -23,7 +23,6 @@ export const kakaoLogin = async () => {
     // console.log("사용자 정보:", user);
 
     const payload = {
-      id: String(user.id),
       login_type: "kakao",
       nickname: user.kakao_account?.profile?.nickname,
       email: user.kakao_account?.email,

@@ -20,7 +20,6 @@ export const naverLogin = async () => {
 
       // 서버로 사용자 정보 전송
       const payload = {
-        id: userInfo.id,
         login_type: "naver",
         nickname: userInfo?.nickname,
         email: userInfo?.email,
