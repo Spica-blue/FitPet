@@ -15,7 +15,7 @@ const KakaoLoginButton = () => {
       const user = await kakaoLogin();
       await AsyncStorage.setItem('userInfo', JSON.stringify(user));
       await AsyncStorage.setItem('loginType', 'kakao');
-      navigation.replace("Home"); // Home 화면으로 이동
+      navigation.replace("GoalSetup"); // Home 화면으로 이동
       // setUserInfo(user);
     } catch(e){}
   };

@@ -8,6 +8,7 @@ import NaverLogin from '@react-native-seoul/naver-login';
 
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
+import GoalSetupScreen from './screens/GoalSetupScreen';
 import Pet from './components/Pet';
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
@@ -30,6 +31,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
         {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>
     </NavigationContainer>

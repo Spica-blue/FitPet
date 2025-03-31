@@ -16,7 +16,7 @@ const NaverLoginButton = () => {
       const user = await naverLogin();
       await AsyncStorage.setItem("userInfo", JSON.stringify(user));
       await AsyncStorage.setItem("loginType", "naver");
-      navigation.replace("Home");
+      navigation.replace("GoalSetup");
     } catch (e) {
       console.error("네이버 로그인 실패:", e);
     }
