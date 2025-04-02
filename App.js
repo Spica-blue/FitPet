@@ -10,6 +10,7 @@ import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import GoalSetupScreen from './screens/GoalSetupScreen';
 import Pet from './components/Pet';
+import SpringTest from "./screens/SpringTest";
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
 const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
@@ -29,9 +30,10 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
+        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} /> */}
+        <Stack.Screen name="SpringTest" component={SpringTest} />
         {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>
     </NavigationContainer>
