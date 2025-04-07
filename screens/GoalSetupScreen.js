@@ -21,7 +21,8 @@ const GoalSetupScreen = () => {
     targetDate: '',
     targetCalories: '',
     dietIntensity: '',
-    dietType: ''
+    dietType: '',
+    allergy: '',
   });
 
   const nextStep = () => setStep(prev => prev + 1);

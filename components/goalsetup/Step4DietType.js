@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, Button, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from "../../styles/StepStyle";
@@ -7,6 +7,8 @@ import { sendUserInfoToServer } from '../../utils/UserAPI';
 
 const Step4DietType = ({ data, setData, navigation, onBack }) => {
   const [selectedType, setSelectedType] = useState(data.dietType || '');
+  const [allergyInput, setAllergyInput] = useState('');
+  const [allergy, setAllergy] = useState(data.allergy || []);
 
   const dietOptions = [
     {
@@ -31,6 +33,19 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
     },
   ];
 
+  const handleAddAllergy = () => {
+    if (allergyInput && !allergy.includes(allergyInput.trim())) {
+      setAllergy([...allergy, allergyInput.trim()]);
+      setAllergyInput(""); // 입력란 초기화
+    } else {
+      Alert.alert("알레르기 추가 실패", "이미 존재하는 알레르기입니다.");
+    }
+  };
+
+  const handleRemoveAllergy = (item) => {
+    setAllergy(allergy.filter((allergen) => allergen !== item));
+  };
+
   const handleNext = async () => {
     // const finalData = { ...data, dietType: selectedType };
     const userInfo = await AsyncStorage.getItem('userInfo');
@@ -45,6 +60,7 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
       currentWeight: Number(data.currentWeight),
       targetWeight: Number(data.targetWeight),
       email,
+      allergy,
     };
     setData(finalData);
     console.log('✅ 최종 입력 데이터:', finalData);
@@ -67,6 +83,38 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
       <Text style={styles.title}>
         마지막으로 식단 계획 선택!{'\n'}식단에 맞는 탄단지 섭취량도 계산해 볼게요
       </Text>
+
+      {/* 알레르기 입력 영역 */}
+      <View style={styles.inputBlock}>
+        <Text style={styles.inputLabel}>알레르기 입력</Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="예: 유제품, 견과류"
+            value={allergyInput}
+            onChangeText={setAllergyInput}
+          />
+          <Button title="추가" onPress={handleAddAllergy} />
+        </View>
+        {/* {allergy.length > 0 && (
+          <Text style={{ marginTop: 8, fontSize: 14, color: '#333' }}>
+            입력한 알레르기: {allergy.join(', ')}
+          </Text>
+        )} */}
+        <Text>알레르기 목록</Text>
+        {allergy.length > 0 && (
+          <ScrollView style={styles.allergyList}>
+            {allergy.map((item, index) => (
+              <View key={index} style={styles.allergyItem}>
+                <Text>{item}</Text>
+                <TouchableOpacity onPress={() => handleRemoveAllergy(item)}>
+                  <Text style={styles.removeText}>삭제</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+      </View>
 
       {dietOptions.map(option => (
         <TouchableOpacity
