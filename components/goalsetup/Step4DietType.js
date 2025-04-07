@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, TextInput, Button, ScrollView } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from "../../styles/StepStyle";
-import { sendUserInfoToServer } from '../../utils/UserAPI';
+import { sendUserInfoToServer, requestGptRecommendation } from '../../utils/UserAPI';
 
 const Step4DietType = ({ data, setData, navigation, onBack }) => {
   const [selectedType, setSelectedType] = useState(data.dietType || '');
@@ -71,6 +71,16 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
     } else {
       // 실패 처리: 예를 들면 사용자에게 토스트나 alert로 알려줄 수도 있어
       console.error("서버 전송 실패:", response.error);
+    }
+
+    if (response.success) {
+      const gptResponse = await requestGptRecommendation(finalData);
+      
+      if (gptResponse.success) {
+        console.log("GPT 결과:", gptResponse.data);
+      } else {
+        console.error("GPT 요청 실패:", gptResponse.error);
+      }
     }
   };
 

@@ -1,5 +1,5 @@
 // const SPRING_URL = "http://192.168.100.196:8883";
-// const FASTAPI_URL = "http://192.168.100.190:8883";  
+const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.67:8883";
 
 const SERVER_URLS = [
@@ -36,8 +36,10 @@ export const sendUserToServer = async (userPayload) => {
   const email = userPayload.email;
 
   return tryServers(async (SERVER_URL) => {
+    // 사용자 조회
     const checkRes = await fetchWithTimeout(`${SERVER_URL}/api/users/${email}`);
 
+    // 사용자 조회 시 있으면 로그인
     if(checkRes.status === 200){
       const loginRes = await fetchWithTimeout(`${SERVER_URL}/api/users/login`, {
         method: "POST",
@@ -51,6 +53,7 @@ export const sendUserToServer = async (userPayload) => {
         : { success: false, error: data };
     }
 
+    // 사용자 조회 시 없으면 회원가입
     if (checkRes.status === 404) {
       const createRes = await fetchWithTimeout(`${SERVER_URL}/api/users/`, {
         method: "POST",
@@ -67,68 +70,9 @@ export const sendUserToServer = async (userPayload) => {
     const errorData = await checkRes.json();
     return { success: false, error: errorData };
   })
-
-  // try{
-  //   // 먼저 사용자 조회 (GET)
-  //   const checkRes = await fetch(`${SERVER_URL}/api/users/${email}`);
-  //   console.log(checkRes.status);
-
-  //   if(checkRes.status === 200){
-  //     // 이미 존재 -> 로그인 갱신
-  //     console.log("기존 사용자입니다. 로그인 시간 갱신 중...");
-
-  //     const loginRes = await fetch(`${SERVER_URL}/api/users/login`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(userPayload),
-  //     });
-
-  //     if(!loginRes.ok){
-  //       const errorData = await loginRes.json();
-  //       console.error("로그인 갱신 실패:", errorData);
-  //       return { success: false, error: errorData };
-  //     }
-
-  //     const data = await loginRes.json();
-  //     console.log("로그인 시간 갱신 완료:", data);
-  //     return { success: true, data };
-  //   }
-
-  //   if (checkRes.status === 404) {
-  //     // 신규 사용자 → 회원가입
-  //     console.log("신규 사용자입니다. 회원가입 진행 중...");
-
-  //     const createRes = await fetch(`${SERVER_URL}/api/users/`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(userPayload),
-  //     });
-
-  //     if (!createRes.ok) {
-  //       const errorData = await createRes.json();
-  //       console.error("회원가입 실패:", errorData);
-  //       return { success: false, error: errorData };
-  //     }
-
-  //     const data = await createRes.json();
-  //     console.log("회원가입 성공:", data);
-  //     return { success: true, data };
-  //   }
-
-  //   // 그 외 예외 상황
-  //   const errorData = await checkRes.json();
-  //   console.error("서버 응답 에러:", errorData);
-  //   return { success: false, error: errorData };
-  // } catch(error){
-  //   console.error("서버 요청 중 에러:", error);
-  //   return { success: false, error };
-  // }
 }
 
+// 탈퇴
 export const deleteUserFromServer = async (email) => {
   return tryServers(async (SERVER_URL) => {
     const res = await fetchWithTimeout(`${SERVER_URL}/api/users/${email}`, {
@@ -141,25 +85,9 @@ export const deleteUserFromServer = async (email) => {
     }
     return { success: true };
   });
-  // try{
-  //   const response = await fetch(`${SERVER_URL}/api/users/${email}`, {
-  //     method: "DELETE",
-  //   });
-
-  //   if(!response.ok){
-  //     const errorData = await response.json();
-  //     console.error("서버 사용자 삭제 실패:", errorData);
-  //     return { success: false, error: errorData };
-  //   }
-
-  //   console.log("서버 사용자 삭제 완료");
-  //   return { success: true };
-  // } catch(error){
-  //   console.error("서버 사용자 삭제 중 에러:", error);
-  //   return { success: false, error };
-  // }
 }
 
+// 유저 정보 서버에 저장
 export const sendUserInfoToServer = async (userInfoPayload) => {
   return tryServers(async (SERVER_URL) => {
     const res = await fetchWithTimeout(`${SERVER_URL}/api/users/user-info`, {
@@ -175,26 +103,42 @@ export const sendUserInfoToServer = async (userInfoPayload) => {
 
     return { success: true };
   });
-  // try{
-  //   const response = await fetch(`${SERVER_URL}/api/users/user-info`, {
+}
+
+// gpt에 정보 보내기
+export const requestGptRecommendation = async (userInfoPayload) => {
+  const gptRes = await fetchWithTimeout(`${FASTAPI_URL}/api/gpt/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userInfoPayload),
+  }, 10000); // 10초
+
+  if (!gptRes.ok) {
+    const error = await gptRes.json();
+    console.error("GPT 추천 요청 실패:", error);
+    return { success: false, error };
+  }
+
+  const data = await gptRes.json();
+  console.log("GPT 추천 요청 성공:", data);
+  return { success: true, data };
+
+  // return tryServers(async (SERVER_URL) => {
+  //   const res = await fetchWithTimeout(`${SERVER_URL}/api/gpt/recommend`, {
   //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
+  //     headers: { "Content-Type": "application/json" },
   //     body: JSON.stringify(userInfoPayload),
   //   });
 
-  //   if(!response.ok){
-  //     const errorData = await response.json();
-  //     console.error("서버 사용자 정보 저장 실패:", errorData);
-  //     return { success: false, error: errorData };
+  //   if (!res.ok) {
+  //     const error = await res.json();
+  //     console.error("GPT 추천 요청 실패:", error);
+  //     return { success: false, error };
   //   }
 
-  //   console.log("서버 사용자 정보 저장 완료");
-  //   return { success: true };
-  // } catch(error){
-  //   console.error("서버 사용자 정보 저장 중 에러:", error);
-  //   return { success: false, error };
-  // }
-}
+  //   const data = await res.json();
+  //   console.log("GPT 추천 요청 성공:", data);
+  //   return { success: true, data };
+  // });
+};
 
