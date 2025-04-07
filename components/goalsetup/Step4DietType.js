@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import styles from "../../styles/StepStyle";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Step4DietType = ({ data, setData, onFinish, onBack }) => {
+import styles from "../../styles/StepStyle";
+import { sendUserInfoToServer } from '../../utils/UserAPI';
+
+const Step4DietType = ({ data, setData, navigation, onBack }) => {
   const [selectedType, setSelectedType] = useState(data.dietType || '');
 
   const dietOptions = [
@@ -28,9 +31,31 @@ const Step4DietType = ({ data, setData, onFinish, onBack }) => {
     },
   ];
 
-  const handleNext = () => {
-    setData(prev => ({ ...prev, dietType: selectedType }));
-    onFinish();
+  const handleNext = async () => {
+    // const finalData = { ...data, dietType: selectedType };
+    const userInfo = await AsyncStorage.getItem('userInfo');
+    const parsed = JSON.parse(userInfo);
+    const email = parsed?.email || parsed?.kakao_account?.email || '';
+    
+    const finalData = {
+      ...data,
+      dietType: selectedType,
+      age: Number(data.age),
+      height: Number(data.height),
+      currentWeight: Number(data.currentWeight),
+      targetWeight: Number(data.targetWeight),
+      email,
+    };
+    setData(finalData);
+    console.log('✅ 최종 입력 데이터:', finalData);
+    
+    const response = await sendUserInfoToServer(finalData);
+    if (response.success) {
+      navigation.replace('Home');
+    } else {
+      // 실패 처리: 예를 들면 사용자에게 토스트나 alert로 알려줄 수도 있어
+      console.error("서버 전송 실패:", response.error);
+    }
   };
 
   return (

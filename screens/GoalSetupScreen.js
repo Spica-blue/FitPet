@@ -20,6 +20,7 @@ const GoalSetupScreen = () => {
     targetWeight: '',
     targetDate: '',
     targetCalories: '',
+    dietIntensity: '',
     dietType: ''
   });
 
@@ -44,11 +45,12 @@ const GoalSetupScreen = () => {
         <Step4DietType
           data={formData}
           setData={setFormData}
-          onFinish={() => {
-            console.log("최종 저장할 데이터 : ", formData);
-            // TODO: 서버 전송 API 연결
-          }}
+          // onFinish={() => {
+          //   console.log("최종 저장할 데이터 : ", formData);
+          //   // TODO: 서버 전송 API 연결
+          // }}
           onBack={prevStep}
+          navigation={navigation}
         />
       )}
     </View>

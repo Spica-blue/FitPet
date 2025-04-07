@@ -30,10 +30,10 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} /> */}
-        <Stack.Screen name="SpringTest" component={SpringTest} />
+        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
+        {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
         {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>
     </NavigationContainer>

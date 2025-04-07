@@ -5,7 +5,8 @@ import styles from "../../styles/StepStyle";
 const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
   const [localData, setLocalData] = useState({
     currentWeight: data.currentWeight || '',
-    targetWeight: data.targetWeight || ''
+    targetWeight: data.targetWeight || '',
+    targetDate: data.targetDate || '',
   });
 
   const handleChange = (field, value) => {
@@ -17,7 +18,14 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
     onNext();
   };
 
-  const isValid = localData.currentWeight && localData.targetWeight;
+  // 목표 체중 검사
+  const heightNum = parseFloat(data.height);
+  const minAllowed = (13 * heightNum * heightNum / 10000).toFixed(1);
+  const maxAllowed = (35 * heightNum * heightNum / 10000).toFixed(1);
+  const targetNum = parseFloat(localData.targetWeight);
+  const isInSafeRange = targetNum >= minAllowed && targetNum <= maxAllowed;
+
+  const isValid = localData.currentWeight && localData.targetWeight && isInSafeRange;
 
   return (
     <View style={styles.container}>
@@ -27,6 +35,7 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
 
       <Text style={styles.title}>목표 체중도 알려주시면{'\n'}추천 계획을 짜볼게요</Text>
 
+      {/* 시작 체중 */}
       <View style={styles.inputBlock}>
         <Text style={styles.inputLabel}>시작 체중</Text>
         <View style={styles.inputRow}>
@@ -41,6 +50,7 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
         </View>
       </View>
 
+      {/* 목표 체중 */}
       <View style={styles.inputBlock}>
         <Text style={styles.inputLabel}>목표 체중</Text>
         <View style={styles.inputRow}>
@@ -54,6 +64,28 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
           <Text style={styles.unitText}>kg</Text>
         </View>
       </View>
+
+      {/* 목표 기간 */}
+      {/* <View style={styles.inputBlock}>
+        <Text style={styles.inputLabel}>언제까지 달성하고 싶나요?(선택)</Text>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="예: 2025-07-01"
+            value={localData.targetDate}
+            onChangeText={(text) => handleChange('targetDate', text)}
+          />
+          <Text style={styles.unitText}>까지</Text>
+        </View>
+      </View> */}
+      
+      {/* BMI 경고 */}
+      {heightNum && localData.targetWeight && !isInSafeRange && (
+        <Text style={{ color: 'tomato', marginBottom: 16 }}>
+          신체 정보로 정상 체중 범위를 계산했어요{'\n'}
+          <Text style={{ fontWeight: 'bold' }}>{minAllowed}kg ~ {maxAllowed}kg</Text> 내에서 목표를 입력해 주세요
+        </Text>
+      )}
 
       <TouchableOpacity
         style={[styles.nextButton, !isValid && styles.disabledButton]}

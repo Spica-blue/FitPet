@@ -3,11 +3,23 @@ import { View, Text, TouchableOpacity, Modal, TextInput } from 'react-native';
 import styles from "../../styles/StepStyle";
 
 const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
-  const [modalVisible, setModalVisible] = useState(false);
   const [customCalories, setCustomCalories] = useState(data.targetCalories?.toString() || '');
   const [bmr, setBmr] = useState(0);
   const [tdee, setTdee] = useState(0);
   const [recommended, setRecommended] = useState(0);
+  const [weeks, setWeeks] = useState(0);
+  const [dietIntensity, setDietIntensity] = useState(data.dietIntensity || '일반');
+  const [finalTargetDate, setFinalTargetDate] = useState(null);
+
+  const intensityOptions = ['느긋하게', '일반', '빠르게']; // 감량 강도 목록
+  // 강도에 따라 하루 감산 kcal 정하기
+  const intensityMap = {
+    '느긋하게': 275,
+    '일반': 550,
+    '빠르게': 825,
+  };
+  
+  const deficitPerDay = intensityMap[dietIntensity] || 550;
 
   // 활동량 -> 계수 매핑
   const activityFactors = {
@@ -39,16 +51,38 @@ const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
     const bmrVal = calculateBMR();
     const factor = activityFactors[data.activityLevel] || 1.2;
     const tdeeVal = Math.round(bmrVal * factor);
-    const target = tdeeVal - 200; // 예시: 감량 목표로 200kcal 감산
+    // const target = tdeeVal - 200; // 예시: 감량 목표로 200kcal 감산
+
+    let recommendedCal = tdeeVal - 200;
+    let weeksToGoal = 0;
+
+    const cw = parseFloat(data.currentWeight);
+    const tw = parseFloat(data.targetWeight);
+    const diff = cw - tw;
+
+    weeksToGoal = Math.ceil(diff * 7700 / (deficitPerDay * 7));
+    recommendedCal = tdeeVal - deficitPerDay;
+
+    const future = new Date();
+    future.setDate(future.getDate() + weeksToGoal * 7);
+    const dateString = future.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    // }
 
     setBmr(bmrVal);
     setTdee(tdeeVal);
-    setRecommended(target);
-    setCustomCalories(String(target));
-  }, [data]);
+    setRecommended(recommendedCal);
+    setCustomCalories(String(recommendedCal));
+    setWeeks(weeksToGoal);
+    setFinalTargetDate(dateString);
+  }, [data, dietIntensity]);
 
   const handleNext = () => {
-    setData(prev => ({ ...prev, targetCalories: Number(customCalories) || recommendedCalories }));
+    setData(prev => ({ 
+      ...prev, 
+      targetCalories: recommended,
+      dietIntensity,
+      targetDate: finalTargetDate, 
+    }));
     onNext();
   };
 
@@ -73,15 +107,27 @@ const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
         <Text style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 4 }}>
           {customCalories} kcal
         </Text>
-        
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={{ color: '#007AFF', fontWeight: '500' }}>목표 수정</Text>
-        </TouchableOpacity>
       </View>
 
       <Text style={{ color: '#888', marginBottom: 32 }}>
-        목표 달성까지 약 19주 걸려요
+        목표 달성까지 약 {weeks}주 걸려요
       </Text>
+
+      <Text style={[styles.inputLabel, { marginTop: 24 }]}>다이어트 강도</Text>
+      <View style={styles.row}>
+        {intensityOptions.map(option => (
+          <TouchableOpacity
+            key={option}
+            style={[
+              styles.genderButton,
+              dietIntensity === option && styles.genderButtonActive,
+            ]}
+            onPress={() => setDietIntensity(option)}
+          >
+            <Text style={styles.genderText}>{option}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <TouchableOpacity
         style={[styles.nextButton, !isValid && styles.disabledButton]}
@@ -90,46 +136,6 @@ const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
       >
         <Text style={styles.nextButtonText}>다음</Text>
       </TouchableOpacity>
-
-      {/* 목표 수정 모달 */}
-      <Modal transparent={true} visible={modalVisible} animationType="slide">
-        <View style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.5)'
-        }}>
-          <View style={{
-            backgroundColor: 'white',
-            borderRadius: 16,
-            padding: 24,
-            width: '80%',
-            alignItems: 'center'
-          }}>
-            <Text style={{ fontSize: 16, marginBottom: 12 }}>목표 섭취 칼로리 입력</Text>
-            <TextInput
-              style={{
-                width: '100%',
-                borderBottomWidth: 1,
-                borderColor: '#ccc',
-                fontSize: 20,
-                paddingVertical: 8,
-                textAlign: 'center',
-                marginBottom: 16,
-              }}
-              keyboardType="numeric"
-              value={customCalories}
-              onChangeText={setCustomCalories}
-            />
-            <TouchableOpacity
-              style={[styles.nextButton, { width: '100%' }]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.nextButtonText}>완료</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   )
 }
