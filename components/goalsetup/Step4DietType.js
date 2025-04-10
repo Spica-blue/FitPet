@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, TextInput, Button, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, TextInput, Button, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from "../../styles/StepStyle";
@@ -9,6 +9,8 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
   const [selectedType, setSelectedType] = useState(data.dietType || '');
   const [allergyInput, setAllergyInput] = useState('');
   const [allergy, setAllergy] = useState(data.allergy || []);
+  const [loading, setLoading] = useState(false);
+  const [gptResult, setGptResult] = useState(null);
 
   const dietOptions = [
     {
@@ -47,7 +49,6 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
   };
 
   const handleNext = async () => {
-    // const finalData = { ...data, dietType: selectedType };
     const userInfo = await AsyncStorage.getItem('userInfo');
     const parsed = JSON.parse(userInfo);
     const email = parsed?.email || parsed?.kakao_account?.email || '';
@@ -64,24 +65,41 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
     };
     setData(finalData);
     console.log('✅ 최종 입력 데이터:', finalData);
+
+    setLoading(true); // ✅ 로딩 시작
     
     const response = await sendUserInfoToServer(finalData);
-    if (response.success) {
-      navigation.replace('Home');
-    } else {
-      // 실패 처리: 예를 들면 사용자에게 토스트나 alert로 알려줄 수도 있어
+    // if (response.success) {
+    //   navigation.replace('Home');
+    // } else {
+    //   // 실패 처리: 예를 들면 사용자에게 토스트나 alert로 알려줄 수도 있어
+    //   console.error("서버 전송 실패:", response.error);
+    // }
+    if (!response.success) {
+      setLoading(false); // 실패 시 로딩 종료
       console.error("서버 전송 실패:", response.error);
+      Alert.alert("서버 오류", "유저 정보를 저장하지 못했어요.");
+      return;
     }
 
-    if (response.success) {
-      const gptResponse = await requestGptRecommendation(finalData);
+    const gptResponse = await requestGptRecommendation(finalData);
+    setLoading(false);
+
+    // if (response.success) {
+      // setLoading(true);
+      // const gptResponse = await requestGptRecommendation(finalData);
+      // setLoading(false);
       
-      if (gptResponse.success) {
-        console.log("GPT 결과:", gptResponse.data);
-      } else {
-        console.error("GPT 요청 실패:", gptResponse.error);
-      }
+    if (gptResponse.success) {
+      const parsedResult = JSON.parse(gptResponse.data.recommendation);
+      navigation.replace("GptResult", { result: parsedResult });
+      // setGptResult(JSON.parse(gptResponse.data.recommendation));
+      console.log("GPT 결과:", gptResponse.data);
+    } else {
+      console.error("GPT 요청 실패:", gptResponse.error);
+      Alert.alert("오류", "GPT 추천 요청에 실패했어요.");
     }
+    // }
   };
 
   return (
@@ -150,6 +168,13 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
       >
         <Text style={styles.nextButtonText}>완료</Text>
       </TouchableOpacity>
+
+      {loading && (
+        <View style={{ marginVertical: 24, alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={{ marginTop: 12, fontSize: 16 }}>AI 추천을 생성 중입니다...</Text>
+        </View>
+      )}
     </View>
   )
 }

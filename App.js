@@ -9,6 +9,7 @@ import NaverLogin from '@react-native-seoul/naver-login';
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import GoalSetupScreen from './screens/GoalSetupScreen';
+import GptResultScreen from "./screens/GptResultScreen";
 import Pet from './components/Pet';
 import SpringTest from "./screens/SpringTest";
 
@@ -33,6 +34,7 @@ export default function App() {
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
+        <Stack.Screen name="GptResult" component={GptResultScreen} />
         {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
         {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>

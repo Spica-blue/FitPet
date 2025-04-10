@@ -1,4 +1,4 @@
-// const SPRING_URL = "http://192.168.100.196:8883";
+const SPRING_URL = "http://192.168.100.196:8883";
 const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.67:8883";
 
@@ -107,11 +107,11 @@ export const sendUserInfoToServer = async (userInfoPayload) => {
 
 // gpt에 정보 보내기
 export const requestGptRecommendation = async (userInfoPayload) => {
-  const gptRes = await fetchWithTimeout(`${FASTAPI_URL}/api/gpt/recommend`, {
+  const gptRes = await fetchWithTimeout(`${SPRING_URL}/api/gpt/recommend`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userInfoPayload),
-  }, 10000); // 10초
+  }, 30000); // 30초
 
   if (!gptRes.ok) {
     const error = await gptRes.json();
