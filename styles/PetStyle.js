@@ -5,7 +5,6 @@ const PetStyle = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
   },
   animation: {
     width: 200,

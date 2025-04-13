@@ -15,24 +15,8 @@ const KakaoLoginButton = () => {
       const user = await kakaoLogin();
       await AsyncStorage.setItem('userInfo', JSON.stringify(user));
       await AsyncStorage.setItem('loginType', 'kakao');
-      navigation.replace("GoalSetup"); // Home 화면으로 이동
+      navigation.replace("GoalSetup");
       // setUserInfo(user);
-    } catch(e){}
-  };
-
-  // 로그아웃 함수
-  const handleLogout = async () => {
-    try{
-      await kakaoLogout();
-      // setUserInfo(null);
-    } catch(e){}
-  };
-
-  // 연결 끊기 (회원 탈퇴)
-  const handleUnlink = async () => {
-    try{
-      await kakaoUnlink();
-      // setUserInfo(null);
     } catch(e){}
   };
 

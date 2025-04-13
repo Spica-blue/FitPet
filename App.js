@@ -6,6 +6,7 @@ import { initializeKakaoSDK } from '@react-native-kakao/core';
 import Constants from 'expo-constants';
 import NaverLogin from '@react-native-seoul/naver-login';
 
+import TabNavigator from './navigation/TabNavigator';
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import GoalSetupScreen from './screens/GoalSetupScreen';
@@ -18,6 +19,7 @@ const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
 const NAVER_CLIENT_SECRET = Constants.expoConfig?.extra?.naverClientSecret;
 
 initializeKakaoSDK('ac08cd35c42272ec7b5586c128239a4f');
+
 NaverLogin.initialize({
   appName: "FitPet",
   consumerKey: NAVER_CLIENT_ID,
@@ -32,9 +34,9 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
         <Stack.Screen name="GptResult" component={GptResultScreen} />
+        <Stack.Screen name="Main" component={TabNavigator} />
         {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
         {/* <Stack.Screen name="Pet" component={Pet} /> */}
       </Stack.Navigator>

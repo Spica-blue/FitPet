@@ -44,7 +44,7 @@ const GptResultComponent = ({ route }) => {
 
       <TouchableOpacity
         style={styles.nextButton}
-        onPress={() => navigation.replace('Home')}
+        onPress={() => navigation.replace('Main')}
       >
         <Text style={styles.nextButtonText}>완료</Text>
       </TouchableOpacity>

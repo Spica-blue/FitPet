@@ -69,12 +69,6 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
     setLoading(true); // ✅ 로딩 시작
     
     const response = await sendUserInfoToServer(finalData);
-    // if (response.success) {
-    //   navigation.replace('Home');
-    // } else {
-    //   // 실패 처리: 예를 들면 사용자에게 토스트나 alert로 알려줄 수도 있어
-    //   console.error("서버 전송 실패:", response.error);
-    // }
     if (!response.success) {
       setLoading(false); // 실패 시 로딩 종료
       console.error("서버 전송 실패:", response.error);
@@ -84,11 +78,6 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
 
     const gptResponse = await requestGptRecommendation(finalData);
     setLoading(false);
-
-    // if (response.success) {
-      // setLoading(true);
-      // const gptResponse = await requestGptRecommendation(finalData);
-      // setLoading(false);
       
     if (gptResponse.success) {
       const parsedResult = JSON.parse(gptResponse.data.recommendation);
@@ -99,7 +88,6 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
       console.error("GPT 요청 실패:", gptResponse.error);
       Alert.alert("오류", "GPT 추천 요청에 실패했어요.");
     }
-    // }
   };
 
   return (

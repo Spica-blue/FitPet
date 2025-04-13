@@ -1,9 +1,10 @@
 const SPRING_URL = "http://192.168.100.196:8883";
-const FASTAPI_URL = "http://192.168.100.190:8883";  
+// const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.67:8883";
+const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
-  "http://192.168.100.190:8883",  // FastAPI (메인)
+  "http://192.168.35.137:8883",  // FastAPI (메인)
   "http://192.168.100.196:8883",  // SpringBoot (백업)
 ];
 
@@ -107,7 +108,7 @@ export const sendUserInfoToServer = async (userInfoPayload) => {
 
 // gpt에 정보 보내기
 export const requestGptRecommendation = async (userInfoPayload) => {
-  const gptRes = await fetchWithTimeout(`${SPRING_URL}/api/gpt/recommend`, {
+  const gptRes = await fetchWithTimeout(`${FASTAPI_URL}/api/gpt/recommend`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userInfoPayload),
