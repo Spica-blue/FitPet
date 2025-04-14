@@ -13,6 +13,8 @@ import GoalSetupScreen from './screens/GoalSetupScreen';
 import GptResultScreen from "./screens/GptResultScreen";
 import Pet from './components/Pet';
 import SpringTest from "./screens/SpringTest";
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
 const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
@@ -29,10 +31,29 @@ NaverLogin.initialize({
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [isReady, setIsReady] = useState(false);
+  const [initialRoute, setInitialRoute] = useState('Onboarding');
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const userInfo = await AsyncStorage.getItem('userInfo');
+      if(userInfo){
+        setInitialRoute('Main');
+      }
+      else{
+        setInitialRoute('Onboarding');
+      }
+      setIsReady(true);
+    };
+
+    checkLogin();
+  }, []);
+
+  if(!isReady) return null; // 로딩 중엔 아무것도 렌더링하지 않음
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
         <Stack.Screen name="GptResult" component={GptResultScreen} />

@@ -80,8 +80,10 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
     setLoading(false);
       
     if (gptResponse.success) {
-      const parsedResult = JSON.parse(gptResponse.data.recommendation);
-      navigation.replace("GptResult", { result: parsedResult });
+      console.log("📦 GPT 응답 타입:", typeof gptResponse.data.recommendation);
+      
+      // const parsedResult = JSON.parse(gptResponse.data.recommendation); // json 파싱
+      navigation.replace("GptResult", { result: gptResponse.data.recommendation });
       // setGptResult(JSON.parse(gptResponse.data.recommendation));
       console.log("GPT 결과:", gptResponse.data);
     } else {

@@ -4,8 +4,8 @@ const SPRING_URL = "http://192.168.100.196:8883";
 const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
-  "http://192.168.35.137:8883",  // FastAPI (메인)
-  "http://192.168.100.196:8883",  // SpringBoot (백업)
+  FASTAPI_URL,  // FastAPI (메인)
+  SPRING_URL,  // SpringBoot (백업)
 ];
 
 const tryServers = async (callback) => {
@@ -108,38 +108,48 @@ export const sendUserInfoToServer = async (userInfoPayload) => {
 
 // gpt에 정보 보내기
 export const requestGptRecommendation = async (userInfoPayload) => {
-  const gptRes = await fetchWithTimeout(`${FASTAPI_URL}/api/gpt/recommend`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(userInfoPayload),
-  }, 30000); // 30초
 
-  if (!gptRes.ok) {
-    const error = await gptRes.json();
-    console.error("GPT 추천 요청 실패:", error);
-    return { success: false, error };
-  }
+  return tryServers(async (SERVER_URL) => {
+    const url = `${SERVER_URL}/api/gpt/recommend`;
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userInfoPayload),
+    };
+    const timeout = 30000;
 
-  const data = await gptRes.json();
-  console.log("GPT 추천 요청 성공:", data);
-  return { success: true, data };
+    const res = await fetchWithTimeout(url, options, timeout);
 
-  // return tryServers(async (SERVER_URL) => {
-  //   const res = await fetchWithTimeout(`${SERVER_URL}/api/gpt/recommend`, {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(userInfoPayload),
-  //   });
+    if (!res.ok) {
+      const error = await res.json();
+      console.error("GPT 추천 요청 실패:", error);
+      return { success: false, error };
+    }
 
-  //   if (!res.ok) {
-  //     const error = await res.json();
-  //     console.error("GPT 추천 요청 실패:", error);
-  //     return { success: false, error };
-  //   }
+    const data = await res.json();
+    console.log("GPT 추천 요청 성공:", data);
+    return { success: true, data };
+  });
+};
 
-  //   const data = await res.json();
-  //   console.log("GPT 추천 요청 성공:", data);
-  //   return { success: true, data };
-  // });
+// 만보기 기록 서버에 보내기
+export const sendStepToServer = async (email, stepCount) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/pedometer/record`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, step_count: stepCount }),
+    });
+
+    const data = await res.json();
+  
+    if (!res.ok) {
+      console.error("걸음 수 저장 실패:", data);
+      return { success: false, error: data };
+    } 
+
+    console.log("✅ 걸음 수 서버 전송 완료:", data);
+    return { success: true, data };
+  })
 };
 
