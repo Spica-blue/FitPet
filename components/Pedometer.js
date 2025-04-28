@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, AppState } from "react-native";
 import { Pedometer as ExpoPedometer } from "expo-sensors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -12,67 +12,85 @@ const Pedometer = () => {
   const baseStepsRef = useRef(null);
   const savedRef = useRef(0);
   const latestStepsRef = useRef(0); // 최신 steps 저장용
+  const resetTimerRef  = useRef(null);
 
-  const KST_NOW = () => {
-    const now = new Date();
-    return new Date(now.getTime() + 9 * 60 * 60 * 1000) // UTC + 9
-  };
+  // 현재 시각을 한국 표준시(KST)로 변환하여 Date 객체로 반환
+  const nowKst = () => {
+    const d = new Date();
+    return new Date(d.getTime() + 9 * 60 * 60_000);
+  }
 
-  // 테스트용 (현재부터 1분 뒤에 리셋되게) → 실제 사용 시 이건 제거
-  const TEST_RESET_AFTER_SECONDS = 20;
+  // YYYY-MM-DD 형식의 오늘 날짜 문자열 반환
+  const todayString = () => {
+    return nowKst().toISOString().slice(0,10);
+  }
 
-  // 하루 기준 시각 비교 (KST 00:00)
-  const getKstDateString = (date) => {
-    // return "2025-04-14"
-    return date.toISOString().slice(0, 10); // YYYY-MM-DD
-  };
+  // 매일 자정에 실행할 리셋 함수
+  const performDailyReset = async () => {
+    // 저장된 유저 정보에서 이메일 꺼내기
+    const userInfo = await AsyncStorage.getItem('userInfo');
+    const parsed = JSON.parse(userInfo);
+    const email = parsed?.email || parsed?.kakao_account?.email || "";
 
-  // 리셋 시점에 기준점도 최신 걸음 수로 재설정
-  const resetStepCount = async () => {
-    setStepCount(0);
-    baseStepsRef.current = latestStepsRef.current; // 기준점 갱신
-    savedRef.current = 0;
-    await AsyncStorage.setItem("stepCount", "0");
-    await AsyncStorage.setItem("lastResetDate", getKstDateString(KST_NOW()));
-  };
-
-  const checkAndResetDaily = async () => {
-    const now = KST_NOW();
-    const today = getKstDateString(now);
-    const lastReset = await AsyncStorage.getItem("lastResetDate");
-
-    // 실제 로직 : 하루 지났으면 리셋
-    if(lastReset !== today){
-      const userInfo = await AsyncStorage.getItem('userInfo');
-      const parsed = JSON.parse(userInfo);
-      const email = parsed?.email || parsed?.kakao_account?.email || '';
-      console.log("하루동안의 만보기 누적 기록 : ", stepCount);
-      
-      const response = await sendStepToServer(email, stepCount);
-      if(!response.success){
-        console.error("서버 전송 실패:", response.error);
-        Alert.alert("서버 오류", "만보기 기록을 저장하지 못했어요.");
-        return;
-      }
-
-      Alert.alert("리셋", "걸음 수를 리셋합니다");
-      await resetStepCount();
+    console.log("어제 걸음 수 업로드:", stepCount);
+    const response = await sendStepToServer(email, stepCount);
+    if (!response.success) {
+      console.error("걸음 수 전송 실패:", response.error);
+      Alert.alert("서버 오류", "만보기 기록을 저장하지 못했어요.");
+      return;
     }
 
-    // 테스트용 리셋(지금부터 60초 후 강제 리셋)
-    // if(startDateRef.current){
-    //   const elapsed = (now.getTime() - startDateRef.current.getTime()) / 1000;
-    //   if(elapsed >= TEST_RESET_AFTER_SECONDS){
-    //     Alert.alert("테스트 리셋", "걸음 수를 리셋합니다");
-    //     await resetStepCount();
-    //     startDateRef.current = KST_NOW();
-    //   }
-    // }
-  };
+    Alert.alert("리셋", "걸음 수를 리셋합니다");
+    // 메모리와 로컬 저장소 둘 다 초기화
+    setStepCount(0);
+    savedRef.current = 0;
+    baseStepsRef.current = latestStepsRef.current;
+    await AsyncStorage.setItem("stepCount", "0");
+    await AsyncStorage.setItem("lastResetDate", todayString());
+  }
+
+  // 다음 자정을 기준으로 한 번만 타이머를 예약
+  const scheduleNextReset = () => {
+    // 이미 예약된 타이머가 있으면 해제
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+
+    const now = nowKst();
+    // 오늘 자정 이후 바로 5초 뒤 시각 계산
+    const nextMidnight = new Date(now);
+    nextMidnight.setHours(24,0,5,0); // 5 seconds past midnight
+    const msUntil = nextMidnight.getTime() - now.getTime();
+
+    // 자정 시각에 performDailyReset 실행, 끝나면 다시 다음 날 예약
+    resetTimerRef.current = setTimeout(async () => {
+      await performDailyReset();
+      scheduleNextReset();
+    }, msUntil);
+  }
+
+  const checkMissedReset = async () => {
+    const last = await AsyncStorage.getItem("lastResetDate");
+    const today = todayString();
+    if (last !== today) {
+      await performDailyReset();
+    }
+    scheduleNextReset();
+  }
+
+  // 리셋 시점에 기준점도 최신 걸음 수로 재설정
+  // const resetStepCount = async () => {
+  //   setStepCount(0);
+  //   baseStepsRef.current = latestStepsRef.current; // 기준점 갱신
+  //   savedRef.current = 0;
+  //   await AsyncStorage.setItem("stepCount", "0");
+  //   await AsyncStorage.setItem("lastResetDate", getKstDateString(KST_NOW()));
+  // };
 
   useEffect(() => {
     let subscription;
-    let checkInterval;
+
+    const subscriptionApp = AppState.addEventListener("change", state => {
+      if (state === "active") checkMissedReset();
+    });
 
     const init = async () => {
       // Expo SDK 51에서는 Motion 권한을 직접 요청 가능
@@ -86,12 +104,10 @@ const Pedometer = () => {
       // 저장된 값 불러우기
       const saved = await AsyncStorage.getItem("stepCount");
       if(saved){
-        const parsed = parseInt(saved);
+        const parsed = parseInt(saved,10);
         setStepCount(parsed);
         savedRef.current = parsed;
       }
-
-      // startDateRef.current = KST_NOW();
 
       subscription = ExpoPedometer.watchStepCount(async ({ steps }) => {
         latestStepsRef.current = steps;
@@ -100,7 +116,6 @@ const Pedometer = () => {
           baseStepsRef.current = steps;
         }
         
-        // const newCount = steps <= 1 ? 0 : steps;
         const adjusted = steps - baseStepsRef.current;
         const total = savedRef.current + adjusted;
 
@@ -108,18 +123,15 @@ const Pedometer = () => {
         await AsyncStorage.setItem("stepCount", total.toString());
       });
 
-      // 10초마다 리셋 여부 확인
-      checkInterval = setInterval(() => {
-        checkAndResetDaily();
-        // console.log("리셋여부 확인");
-      }, 10000);
+      await checkMissedReset();
     };
 
     init();
 
     return () => {
       if(subscription) subscription.remove();
-      // if(checkInterval) clearInterval(checkInterval);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+      subscriptionApp.remove();
     };
   }, []);
 
