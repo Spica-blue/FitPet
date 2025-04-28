@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack"
 import { initializeKakaoSDK } from '@react-native-kakao/core';
@@ -52,22 +53,31 @@ export default function App() {
   if(!isReady) return null; // 로딩 중엔 아무것도 렌더링하지 않음
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
-        <Stack.Screen name="GptResult" component={GptResultScreen} />
-        <Stack.Screen name="Main" component={TabNavigator} />
-        {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
-        {/* <Stack.Screen name="Pet" component={Pet} /> */}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" translucent={true} backgroundColor="transparent" />
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
+            <Stack.Screen name="GptResult" component={GptResultScreen} />
+            <Stack.Screen name="Main" component={TabNavigator} />
+            {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
+            {/* <Stack.Screen name="Pet" component={Pet} /> */}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: '#fff',
+  // },
+  safeArea: {
+     flex: 1,
+     backgroundColor: '#fff',
   },
 });

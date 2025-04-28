@@ -132,6 +132,29 @@ export const requestGptRecommendation = async (userInfoPayload) => {
   });
 };
 
+// gpt 추천 결과 받아오기
+export async function fetchRecommendationByDate(email, date) {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/gpt/recommend?email=${email}&date=${date}`);
+    
+    // 404는 “데이터 없음” 처리
+    if (res.status === 404) {
+      return { success: true, data: null };
+    }
+    
+    const data = await res.json();
+
+    // 의도치 않은 에러(500 등)면 실패 처리
+    if (!res.ok) {
+      console.error("gpt 추천 결과 조회 실패:", data);
+      return { success: false, error: data };
+    } 
+
+    console.log("✅ gpt 추천 결과 조회 완료:", data);
+    return { success: true, data: data };
+  })
+}
+
 // 만보기 기록 서버에 보내기
 export const sendStepToServer = async (email, stepCount) => {
   return tryServers(async (SERVER_URL) => {
@@ -152,4 +175,57 @@ export const sendStepToServer = async (email, stepCount) => {
     return { success: true, data };
   })
 };
+
+// 하루 한 끼 또는 전체 끼니를 저장/업데이트 합니다.
+// @param {{ email: string, date: string, breakfast?: string, lunch?: string, dinner?: string }} payload
+export const saveDiet = async (payload) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/diet`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const data = await res.json();
+    
+    if(!res.ok){
+      console.log("식단 저장 실패: ", data);
+      return { success: false, error: data }
+    }
+
+    console.log("식단 저장 완료: ", data);
+    return { success: true, data: data}
+  })
+}
+
+/**
+ * 특정 날짜의 식단 기록을 가져옵니다.
+ * @param {string} email  - 사용자 이메일
+ * @param {string} date   - 조회할 날짜 (YYYY-MM-DD)
+ * @returns {Promise<{success: boolean, data?: { email, date, breakfast, lunch, dinner, created_at }, error?: any }>}
+*/
+export const fetchDietByDate = async (email, date) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/diet?email=${encodeURIComponent(email)}&date=${date}`);
+
+    // 404면 “해당 날짜에 식단이 없음”으로 처리
+    if (res.status === 404) {
+      return { success: true, data: null };
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // 500 등 실제 에러
+      console.log("식단 조회 실패: ", data);
+      return { success: false, error: data };
+    }
+
+    // 정상 응답: DietResponse 형태
+    console.log("식단 조회 완료: ", data);
+    return { success: true, data: data };
+  });
+}
 
