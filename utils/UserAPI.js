@@ -50,7 +50,7 @@ export const sendUserToServer = async (userPayload) => {
 
       const data = await loginRes.json();
       return loginRes.ok
-        ? { success: true, data }
+        ? { success: true, data, isNew: false }
         : { success: false, error: data };
     }
 
@@ -64,7 +64,7 @@ export const sendUserToServer = async (userPayload) => {
 
       const data = await createRes.json();
       return createRes.ok
-        ? { success: true, data }
+        ? { success: true, data, isNew: true }
         : { success: false, error: data };
     }
 

@@ -13,10 +13,18 @@ const NaverLoginButton = () => {
   // 로그인 함수
   const handleLogin = async () => {
     try {
-      const user = await naverLogin();
+      const { user, isNew } = await naverLogin();
       await AsyncStorage.setItem("userInfo", JSON.stringify(user));
       await AsyncStorage.setItem("loginType", "naver");
-      navigation.replace("GoalSetup");
+      // navigation.replace("GoalSetup");
+      
+      // 서버에 사용자 전송 후, isNew 플래그로 분기
+      if(isNew){
+        navigation.replace("GoalSetup");
+      }
+      else{
+        navigation.replace("Main");
+      }
     } catch (e) {
       console.error("네이버 로그인 실패:", e);
     }

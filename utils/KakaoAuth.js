@@ -29,8 +29,11 @@ export const kakaoLogin = async () => {
       profile_image: user.kakao_account?.profile?.profile_image_url,
     };
 
-    await sendUserToServer(payload);
-    return user;
+    const { success, data, isNew } = await sendUserToServer(payload);
+    if (!success) throw new Error("서버 로그인/회원가입 실패");
+
+    // 최종으로 사용자 정보와 신규 여부를 리턴
+    return { user, isNew };
   } catch(error){
     console.error("카카오 로그인 실패:", error);
   }

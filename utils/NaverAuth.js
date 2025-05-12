@@ -15,20 +15,21 @@ export const naverLogin = async () => {
       const profile = await NaverLogin.getProfile(token);
       console.log("사용자 정보:", profile);
 
-      const userInfo = profile.response;
-      await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
+      const user = profile.response;
 
       // 서버로 사용자 정보 전송
       const payload = {
         login_type: "naver",
-        nickname: userInfo?.nickname,
-        email: userInfo?.email,
-        profile_image: userInfo.profile_image,
+        nickname: user?.nickname,
+        email: user?.email,
+        profile_image: user.profile_image,
       };
 
-      await sendUserToServer(payload);
+      const { success, data, isNew } = await sendUserToServer(payload);
+      if (!success) throw new Error("서버 로그인/회원가입 실패");
 
-      return userInfo;
+      // 최종으로 사용자 정보와 신규 여부를 리턴
+    return { user, isNew };
     }
     else{
       throw new Error(failureResponse?.message || "네이버 로그인 실패");

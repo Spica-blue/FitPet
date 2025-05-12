@@ -12,12 +12,22 @@ const KakaoLoginButton = () => {
   // 로그인 함수
   const handleLogin = async () => {
     try{
-      const user = await kakaoLogin();
+      const { user, isNew } = await kakaoLogin();
       await AsyncStorage.setItem('userInfo', JSON.stringify(user));
       await AsyncStorage.setItem('loginType', 'kakao');
-      navigation.replace("GoalSetup");
+      // navigation.replace("GoalSetup");
       // setUserInfo(user);
-    } catch(e){}
+
+      // 서버에 사용자 전송 후, isNew 플래그로 분기
+      if(isNew){
+        navigation.replace("GoalSetup");
+      }
+      else{
+        navigation.replace("Main");
+      }
+    } catch(e){
+      console.error("카카오 로그인 처리 중 오류:", e);
+    }
   };
 
   return (
