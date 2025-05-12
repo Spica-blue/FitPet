@@ -16,6 +16,7 @@ import Pet from './components/Pet';
 import SpringTest from "./screens/SpringTest";
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DiaryEntryScreen from './screens/DiaryEntryScreen';
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
 const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;
@@ -62,6 +63,7 @@ export default function App() {
             <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
             <Stack.Screen name="GptResult" component={GptResultScreen} />
             <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="DiaryEntry" component={DiaryEntryScreen} />
             {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
             {/* <Stack.Screen name="Pet" component={Pet} /> */}
           </Stack.Navigator>

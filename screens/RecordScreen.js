@@ -19,7 +19,6 @@ const RecordScreen = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // TODO: 실제로는 여기서 API 호출
     loadAllData(date);
   }, [date]);
 
