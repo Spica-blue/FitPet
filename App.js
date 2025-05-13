@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack"
 import { initializeKakaoSDK } from '@react-native-kakao/core';
+import { LocaleConfig } from 'react-native-calendars';
 import Constants from 'expo-constants';
 import NaverLogin from '@react-native-seoul/naver-login';
 
@@ -17,6 +18,26 @@ import SpringTest from "./screens/SpringTest";
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DiaryEntryScreen from './screens/DiaryEntryScreen';
+
+// 한국어 로케일 정의
+LocaleConfig.locales['ko'] = {
+  monthNames: [
+    '1월','2월','3월','4월','5월','6월',
+    '7월','8월','9월','10월','11월','12월'
+  ],
+  monthNamesShort: [
+    '1월','2월','3월','4월','5월','6월',
+    '7월','8월','9월','10월','11월','12월'
+  ],
+  dayNames: [
+    '일요일','월요일','화요일','수요일','목요일','금요일','토요일'
+  ],
+  dayNamesShort: ['일','월','화','수','목','금','토'],
+  today: '오늘'
+};
+
+// 기본 로케일을 한국어로 설정
+LocaleConfig.defaultLocale = 'ko';
 
 // 1️⃣ 앱 실행 시 초기화할 네이버 키 설정
 const NAVER_CLIENT_ID = Constants.expoConfig?.extra?.naverClientId;

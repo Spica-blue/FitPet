@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../styles/PedometerStyle";
 import { sendStepToServer } from "../utils/UserAPI";
 
-const Pedometer = () => {
+const Pedometer = ({ goal = 0 }) => {
   const [stepCount, setStepCount] = useState(0);
   // const startDateRef = useRef(null); // 테스트용
   const baseStepsRef = useRef(null);
@@ -36,7 +36,19 @@ const Pedometer = () => {
   // 매일 자정에 실행할 리셋 함수
   const performDailyReset = async () => {
     const email = await getEmail();
-    const STEP_KEY = `stepCount_${email}`;
+
+    // const dateKey = todayString();
+    // 어제 날짜를 key 로 사용
+    const yesterday = nowKst();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // 3. YYYY-MM-DD 포맷으로 직접 조합
+    const yyyy = yesterday.getFullYear();
+    const mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const dd = String(yesterday.getDate()).padStart(2, '0');
+    const dateKey = `${yyyy}-${mm}-${dd}`;
+    // const dateKey = yesterday.toISOString().slice(0,10);
+    const STEP_KEY = `stepCount_${email}_${dateKey}`;
     const RESET_DATE_KEY = `lastResetDate_${email}`;
 
     console.log("어제 걸음 수 업로드:", stepCount);
@@ -47,13 +59,14 @@ const Pedometer = () => {
       return;
     }
 
+    await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
+
     Alert.alert("리셋", "걸음 수를 리셋합니다");
     // 메모리와 로컬 저장소 둘 다 초기화
     setStepCount(0);
     savedRef.current = 0;
     baseStepsRef.current = latestStepsRef.current;
-    await AsyncStorage.setItem(STEP_KEY, "0");
-    await AsyncStorage.setItem(RESET_DATE_KEY, todayString());
+    await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
   }
 
   // 다음 자정을 기준으로 한 번만 타이머를 예약
@@ -85,16 +98,32 @@ const Pedometer = () => {
     await scheduleNextReset();
   }
 
-  // 리셋 시점에 기준점도 최신 걸음 수로 재설정
-  // const resetStepCount = async () => {
-  //   setStepCount(0);
-  //   baseStepsRef.current = latestStepsRef.current; // 기준점 갱신
-  //   savedRef.current = 0;
-  //   await AsyncStorage.setItem("stepCount", "0");
-  //   await AsyncStorage.setItem("lastResetDate", getKstDateString(KST_NOW()));
-  // };
+  // 로컬 캐시 삭제
+  // async function clearDatedStepAndGoalCache() {
+  //   // 1) 모든 키 가져오기
+  //   const allKeys = await AsyncStorage.getAllKeys();
+
+  //   // 2) 이메일 포함한 패턴으로 필터링
+  //   //    예: goalSteps_heo1356@gmail.com_2025-05-12
+  //   //         stepCount_heo1356@gmail.com_2025-05-13
+  //   const datedKeys = allKeys.filter(key => {
+  //     return (
+  //       key.startsWith('goalSteps_') || key.startsWith('stepCount_')
+  //     ) && /\d{4}-\d{2}-\d{2}$/.test(key);
+  //   });
+
+  //   // 3) 삭제
+  //   if (datedKeys.length > 0) {
+  //     await AsyncStorage.multiRemove(datedKeys);
+  //     console.log('삭제된 로컬 캐시 키:', datedKeys);
+  //   } else {
+  //     console.log('삭제할 dated 캐시 키가 없습니다.');
+  //   }
+  // }
 
   useEffect(() => {
+    // 로컬 캐시 삭제
+    // clearDatedStepAndGoalCache();
     let subscription;
 
     const subscriptionApp = AppState.addEventListener("change", state => {
@@ -150,7 +179,7 @@ const Pedometer = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>📱 만보기 테스트</Text>
-      <Text style={styles.steps}>👣 현재 걸음 수: {stepCount.toLocaleString()}</Text>
+      <Text style={styles.steps}>👣 현재 걸음 수: {stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
     </View>
   );
 };

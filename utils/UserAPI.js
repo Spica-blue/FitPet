@@ -1,7 +1,7 @@
 const SPRING_URL = "http://192.168.100.196:8883";
-const FASTAPI_URL = "http://192.168.100.190:8883";  
+// const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.67:8883";
-// const FASTAPI_URL = "http://192.168.35.137:8883";   
+const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
   FASTAPI_URL,  // FastAPI (메인)
@@ -176,8 +176,41 @@ export const sendStepToServer = async (email, stepCount) => {
   })
 };
 
-// 하루 한 끼 또는 전체 끼니를 저장/업데이트 합니다.
-// @param {{ email: string, date: string, breakfast?: string, lunch?: string, dinner?: string }} payload
+/** 특정 날짜의 만보기 기록을 조회합니다.
+  * @param {string} email - 사용자 이메일
+  * @param {string} date  - 조회할 날짜 (YYYY-MM-DD)
+  * @returns {Promise<{ success: boolean, data?: { steps: number }, error?: any }>}
+*/
+// 아직 사용 안함
+export const fetchStepByDate = async (email, date) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/pedometer/record?email=${encodeURIComponent(email)}&date=${date}`);
+
+    // 404면 "해당 날짜에 기록 없음"으로 보고 steps = 0
+    if(res.status == 404){
+      return { success: true, data: { steps: 0 } };
+    }
+
+    const data = await res.json();
+    if(!res.ok){
+      console.error("걸음 수 조회 실패: ", data);
+      return { success: false, error: data};
+    }
+
+    // 서버가 { email, date, step_count, ... } 형태로 반환한다고 가정
+    const steps = typeof data.step_count === 'number'
+      ? data.step_count
+      : parseInt(data.step_count, 10) || 0;
+
+    console.log("✅ 걸음 수 조회 완료:", date, steps);
+    return { success: true, data: { steps } };
+  })
+}
+
+/** 
+ *  하루 한 끼 또는 전체 끼니를 저장/업데이트 합니다.
+ * @param {{ email: string, date: string, breakfast?: string, lunch?: string, dinner?: string }} payload
+*/
 export const saveDiet = async (payload) => {
   return tryServers(async (SERVER_URL) => {
     const res = await fetchWithTimeout(`${SERVER_URL}/api/diet`,
@@ -228,4 +261,66 @@ export const fetchDietByDate = async (email, date) => {
     return { success: true, data: data };
   });
 }
+
+// 일기 저장
+export const saveCalendarNote = async ({ email, date, note, workout_success }) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/calendar/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, date, note, workout_success }),
+    },
+    5000  
+    );
+
+    const data = await res.json();
+
+    if(!res.ok){
+      console.error("캘린더 저장 실패: ", data);
+      return { success: false, error: data };
+    }
+
+    return { success: true, data };
+  });
+};
+
+// 일기 조회
+export const fetchCalendarNote = async (email, date) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/calendar/?email=${encodeURIComponent(email)}&date=${date}`);
+
+    if(res.status === 404){
+      return { success: true, data: null};
+    }
+
+    const data = await res.json();
+    if(!res.ok){
+      console.error("캘린더 조회 실패: ", data);
+      return { success: false, error: data };
+    }
+    // console.log("data: ", data);
+    return { success: true, data };
+  });
+};
+
+// 일기 삭제
+export const deleteCalendarNote = async (email, date) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/calendar/?email=${encodeURIComponent(email)}&date=${date}`, {
+      method: 'DELETE'
+    });
+
+    if(res.status === 404){
+      return { success: true };
+    }
+
+    if(!res.ok){
+      const data = await res.json();
+      console.error("캘린더 삭제 실패: ", data);
+      return { success: false, error: data };
+    }
+
+    return { success: true };
+  });
+};
 

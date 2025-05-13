@@ -1,12 +1,13 @@
 import React from 'react';
 import { Calendar as RNCalendar } from 'react-native-calendars';
 
-const Calendar = ({ markedDates = {}, onDayPress, current, enableSwipeMonths = false, ...rest }) => {
+const Calendar = ({ markedDates = {}, onDayPress, current, enableSwipeMonths = false, markingType = 'simple', ...rest }) => {
   return (
     <RNCalendar
       current={current}
       onDayPress={onDayPress}
       markedDates={markedDates}
+      markingType={markingType}
       enableSwipeMonths={enableSwipeMonths}
       {...rest}
       theme={{

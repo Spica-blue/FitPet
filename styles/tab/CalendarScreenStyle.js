@@ -26,4 +26,14 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  diaryContent: {
+    marginVertical: 12,
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
 });
