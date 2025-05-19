@@ -46,6 +46,7 @@ const RecordScreen = () => {
     let cursor = new Date(targetDate);
     for(let i=0;i<7;i++){   // 최대 7일 이전까지
       const d = cursor.toISOString().slice(0,10);
+      console.log("d:",d);
       const r = await fetchRecommendationByDate(email, d);
       if(r.success && r.data){
         rec = { ...r.data, asOf: d };

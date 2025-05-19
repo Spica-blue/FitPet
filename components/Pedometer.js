@@ -60,13 +60,13 @@ const Pedometer = ({ goal = 0 }) => {
     }
 
     await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
+    await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
 
     Alert.alert("리셋", "걸음 수를 리셋합니다");
     // 메모리와 로컬 저장소 둘 다 초기화
     setStepCount(0);
     savedRef.current = 0;
     baseStepsRef.current = latestStepsRef.current;
-    await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
   }
 
   // 다음 자정을 기준으로 한 번만 타이머를 예약
@@ -99,27 +99,27 @@ const Pedometer = ({ goal = 0 }) => {
   }
 
   // 로컬 캐시 삭제
-  // async function clearDatedStepAndGoalCache() {
-  //   // 1) 모든 키 가져오기
-  //   const allKeys = await AsyncStorage.getAllKeys();
+  async function clearDatedStepAndGoalCache() {
+    // 1) 모든 키 가져오기
+    const allKeys = await AsyncStorage.getAllKeys();
 
-  //   // 2) 이메일 포함한 패턴으로 필터링
-  //   //    예: goalSteps_heo1356@gmail.com_2025-05-12
-  //   //         stepCount_heo1356@gmail.com_2025-05-13
-  //   const datedKeys = allKeys.filter(key => {
-  //     return (
-  //       key.startsWith('goalSteps_') || key.startsWith('stepCount_')
-  //     ) && /\d{4}-\d{2}-\d{2}$/.test(key);
-  //   });
+    // 2) 이메일 포함한 패턴으로 필터링
+    //    예: goalSteps_heo1356@gmail.com_2025-05-12
+    //         stepCount_heo1356@gmail.com_2025-05-13
+    const datedKeys = allKeys.filter(key => {
+      return (
+        key.startsWith('goalSteps_') || key.startsWith('stepCount_')
+      ) && /\d{4}-\d{2}-\d{2}$/.test(key);
+    });
 
-  //   // 3) 삭제
-  //   if (datedKeys.length > 0) {
-  //     await AsyncStorage.multiRemove(datedKeys);
-  //     console.log('삭제된 로컬 캐시 키:', datedKeys);
-  //   } else {
-  //     console.log('삭제할 dated 캐시 키가 없습니다.');
-  //   }
-  // }
+    // 3) 삭제
+    if (datedKeys.length > 0) {
+      await AsyncStorage.multiRemove(datedKeys);
+      console.log('삭제된 로컬 캐시 키:', datedKeys);
+    } else {
+      console.log('삭제할 dated 캐시 키가 없습니다.');
+    }
+  }
 
   useEffect(() => {
     // 로컬 캐시 삭제

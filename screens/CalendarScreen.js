@@ -83,121 +83,14 @@ const CalenderScreen = ({ navigation }) => {
   // 로컬에 실제 기록된 날짜에 해당하는 키 markedDates 생성
   const loadMarks = async () => {
     setLoading(true);
-    const email = await getEmail();
 
     // 1) 앱에 저장된 모든 키 가져오기
     const allKeys = await AsyncStorage.getAllKeys();
     console.log('🍱 AsyncStorage Keys:', allKeys);
 
-    // 2) 이번 달(예: "2025-05")에 해당하는 step과 goal 키만 필터링
-    // const year  = currentDate.getFullYear();
-    // const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // "05"
-    // const prefixStep = `stepCount_${email}_${year}-${month}-`;
-    // const prefixGoal = `goalSteps_${email}_${year}-${month}-`;
-
-    // step 키들 (날짜별로 하나씩)
-    // const stepKeys = allKeys.filter(k => k.startsWith(prefixStep));
-    const stepKeys = allKeys.filter(k => k.startsWith(`stepCount_${email}_`));
-    // goal 키들
-    // const goalKeys = allKeys.filter(k => k.startsWith(prefixGoal));
-    const goalKeys = allKeys.filter(k => k.startsWith(`goalSteps_${email}_`));
-
-    // 3) multiGet 으로 한 번에 불러오기
-    const stores = await AsyncStorage.multiGet([...stepKeys, ...goalKeys]);
-    const cache  = Object.fromEntries(stores);
-
-    // 4) 날짜별로 marks 생성
     const marks = {};
-    stepKeys.forEach(key => {
-      // key = "stepCount_email_2025-05-12"
-      // const dateStr = key.slice(prefixStep.length); // "12" 이후 포함, actually "2025-05-12"
-      // 'stepCount_email_2025-05-13' → ['stepCount', 'email', '2025-05-13']
-      // const parts = key.split('_');
-      // const dateStr = parts[parts.length - 1];  
-      const dateStr = key.split('_').pop();
-      const steps = parseInt(cache[key], 10) || 0;
-      const goalKey = `goalSteps_${email}_${dateStr}`;
-      const goal = parseInt(cache[goalKey], 10) || 0;
-      const success = goal > 0 && steps >= goal;
 
-      marks[dateStr] = {
-        customStyles: {
-          container: { 
-            backgroundColor: success ? '#4CAF50' : '#F44336' 
-          },
-          text: { 
-            color: 'white' 
-          },
-        },
-        dots: []
-      };
-    });
-
-    // const monthStart = new Date(currentDate);
-    // monthStart.setDate(1);
-    // const base = monthStart.toISOString().slice(0,10);
-    // // const marks = {};
-
-    // // 31일치 키 목록 생성
-    // const dates = Array.from({ length: 31 }, (_, i) => 
-    //   offsetDateString(base, -i)
-    // );
-    // const stepKeys = dates.map(d => `stepCount_${email}_${d}`);
-    // const goalKeys = dates.map(d => `goalSteps_${email}_${d}`);
-    // const allKeys = [...stepKeys, ...goalKeys];
-
-    // // multiGet으로 한 번에 불러오기
-    // const stores = await AsyncStorage.multiGet(allKeys);
-
-    // // { key: value } 형태로 변환
-    // const cache = Object.fromEntries(stores);
-
-    // const marks = {};
-    // dates.forEach(dateStr => {
-    //   const steps   = parseInt(cache[`stepCount_${email}_${dateStr}`], 10) || 0;
-    //   const goal    = parseInt(cache[`goalSteps_${email}_${dateStr}`], 10)  || 0;
-    //   const succeeded = goal > 0 && steps >= goal;
-
-    //   marks[dateStr] = {
-    //     customStyles: {
-    //       container: {
-    //         backgroundColor: succeeded ? '#4CAF50' : '#F44336',
-    //       },
-    //       text: { color: 'white' },
-    //     }
-    //   };
-    // });
-
-    // for(let i=0;i<31;i++){
-    //   const dateStr = offsetDateString(base, -i);
-      
-    //   // 1) 걸음 수
-    //   const stepRes = await fetchStepByDate(email, dateStr);
-
-    //   // 2) 목표 걸음 수
-    //   const recRes = await fetchRecommendationByDate(email, dateStr);
-    //   if(!stepRes.success || !recRes.success) continue;
-
-    //   const steps = stepRes.data.steps;
-    //   const rawGoal = recRes.data?.recommendations?.운동?.["하루 목표 빠른 걸음 수"] ?? '';
-    //   const goal = parseInt(rawGoal.split('(')[0],10) || 0;
-
-    //   // 달성 여부 : 목표 > 0 && steps >= goal
-    //   const succeeded = goal > 0 && steps >= goal;
-
-    //   marks[dateStr] = {
-    //     customStyles: {
-    //       container: {
-    //         backgroundColor: succeeded ? '#4CAF50' : '#F44336',
-    //       },
-    //       text: {
-    //         color: 'white',
-    //       },
-    //     }
-    //   };
-    // }
-
-    // 3) 일기 작성된 날짜 찾기
+    // 2) 일기 작성된 날짜 찾기
     const diaryKeys = allKeys.filter(k => k.startsWith('diary-'));
     diaryKeys.forEach(key => {
       const dateStr = key.replace('diary-','');
@@ -258,6 +151,8 @@ const CalenderScreen = ({ navigation }) => {
     // 선택일 초기화 (원하면 지우거나 유지하세요)
     // setSelectedDate(null);
   };
+
+  console.log("selecteddate : ", selectedDate);
 
   // GestureRecognizer 설정
   const swipeConfig = {

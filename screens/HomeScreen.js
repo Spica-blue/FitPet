@@ -48,8 +48,8 @@ const HomeScreen = () => {
         // setGoalSteps(isNaN(goal) ? 0 : goal);
 
         // 로컬에도 저장
-        const dateKey = todayString();
-        await AsyncStorage.setItem(`goalSteps_${email}_${dateKey}`, goal.toString());
+        // const dateKey = todayString();
+        // await AsyncStorage.setItem(`goalSteps_${email}_${dateKey}`, goal.toString());
 
         setGoalSteps(goal);
       }
