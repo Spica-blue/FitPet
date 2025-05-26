@@ -18,6 +18,7 @@ import SpringTest from "./screens/SpringTest";
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DiaryEntryScreen from './screens/DiaryEntryScreen';
+import PetSelectionScreen from './screens/PetSelectionScreen';
 
 // 한국어 로케일 정의
 LocaleConfig.locales['ko'] = {
@@ -85,6 +86,7 @@ export default function App() {
             <Stack.Screen name="GptResult" component={GptResultScreen} />
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen name="DiaryEntry" component={DiaryEntryScreen} />
+            <Stack.Screen name="PetSelection" component={PetSelectionScreen} options={{ title: "캐릭터 선택" }} />
             {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
             {/* <Stack.Screen name="Pet" component={Pet} /> */}
           </Stack.Navigator>
