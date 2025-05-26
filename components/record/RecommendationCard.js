@@ -17,10 +17,15 @@ const RecommendationCard = ({ recommendation }) => {
   }
 
   // 실제 데이터는 recommendation.recommendations 안에 들어있음
-  const { recommendations, asOf, created_at } = recommendation;
+  const { recommendations, asOf, createdAt } = recommendation;
 
   // 날짜 표시용: asOf(사용자가 지정한 기준) 또는 created_at(저장된 타임스탬프)
-  const 기준날짜 = created_at.split('T')[0];
+  // const 기준날짜 = created_at.split('T')[0];
+  const 기준날짜 = asOf
+    ? asOf
+    : createdAt
+    ? createdAt.split("T")[0]
+    : "";
 
   // guard: 혹시 안 찍혀있으면 빈 객체
   const 식단 = recommendations.식단 || {};
