@@ -6,8 +6,15 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import styles from "../styles/PetStyle";
 
+// 이펙트별 위치 보정값
+const EFFECT_OFFSETS = {
+  heart: { top: -110 },
+  star:  { top: -130, width: 180, height: 180 },
+};
+
 const Pet = () => {
   const [pet, setPet] = useState(null);
+  const [effect, setEffect] = useState(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
@@ -31,6 +38,18 @@ const Pet = () => {
     navigation.navigate("PetSelection");
   };
 
+  // 캐릭터 터치 시 호출
+  const handleCharacterTap = () => {
+    // 랜덤으로 heart or star
+    const choice = Math.random() < 0.5 ? "heart" : "star";
+    setEffect(choice);
+  };
+
+  // 이펙트 애니메이션 완료 시
+  const onEffectFinish = () => {
+    setEffect(null);
+  };
+
   return(
     <View style={styles.container}>
       {/* <LottieView
@@ -41,18 +60,43 @@ const Pet = () => {
       /> */}
       {pet ? (
         <>
-          <LottieView
-            source={
-              pet === "happy_dog"
-                ? require("../assets/pet/happy_dog.json") 
-                : pet === "happy_cat"
-                ? require("../assets/pet/happy_cat.json")
-                : require("../assets/pet/smile_emoji.json")
-            }
-            autoPlay
-            loop
-            style={styles.animation}
-          />
+          {/* 캐릭터 터치 영역 */}
+          <View style={styles.charWrapper}>
+            <TouchableOpacity activeOpacity={0.8} onPress={handleCharacterTap}>
+              <LottieView
+                source={
+                  pet === "happy_dog"
+                    ? require("../assets/pet/happy_dog.json") 
+                    : pet === "happy_cat"
+                    ? require("../assets/pet/happy_cat.json")
+                    : require("../assets/pet/smile_emoji.json")
+                }
+                autoPlay
+                loop
+                style={styles.animation}
+              />
+            </TouchableOpacity>
+
+            {/* 하트/별 이펙트 */}
+            {effect && (
+              <LottieView
+                source={
+                  effect === "heart"
+                    ? require("../assets/eff/heart.json")
+                    : require("../assets/eff/star.json") 
+                }
+                autoPlay
+                loop={false}
+                onAnimationFinish={onEffectFinish}
+                // 이펙트별 오프셋을 style 로 덮어쓰기
+                style={[
+                  styles.effectContainer,
+                  EFFECT_OFFSETS[effect]
+                ]}
+              />
+            )}
+          </View>
+
           <TouchableOpacity onPress={handlePress} style={styles.changeButton}>
             <Text style={styles.changeButtonText}>캐릭터 변경</Text>
           </TouchableOpacity>

@@ -6,6 +6,11 @@ const PetStyle = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  charWrapper: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   animation: {
     width: 200,
     height: 200,
@@ -25,6 +30,13 @@ const PetStyle = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  effectContainer: {
+    position: "absolute",
+    top: -30,       // 캐릭터 머리 위로 띄우기 (값 조절)
+    alignSelf: "center",
+    width: 120,
+    height: 120
   },
 });
 
