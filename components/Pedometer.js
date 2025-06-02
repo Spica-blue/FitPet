@@ -48,7 +48,7 @@ const Pedometer = ({ goal = 0 }) => {
     const dd = String(yesterday.getDate()).padStart(2, '0');
     const dateKey = `${yyyy}-${mm}-${dd}`;
     // const dateKey = yesterday.toISOString().slice(0,10);
-    const STEP_KEY = `stepCount_${email}_${dateKey}`;
+    // const STEP_KEY = `stepCount_${email}_${dateKey}`;
     const RESET_DATE_KEY = `lastResetDate_${email}`;
 
     console.log("어제 걸음 수 업로드:", stepCount);
@@ -59,7 +59,7 @@ const Pedometer = ({ goal = 0 }) => {
       return;
     }
 
-    await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
+    // await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
     await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
 
     Alert.alert("리셋", "걸음 수를 리셋합니다");
