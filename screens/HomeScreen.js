@@ -51,6 +51,7 @@ const HomeScreen = () => {
         // const dateKey = todayString();
         // await AsyncStorage.setItem(`goalSteps_${email}_${dateKey}`, goal.toString());
 
+        await AsyncStorage.setItem(`goalSteps_${email}`, goal.toString());
         setGoalSteps(goal);
       }
 

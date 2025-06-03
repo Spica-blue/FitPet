@@ -62,7 +62,7 @@ const Pedometer = ({ goal = 0 }) => {
     // await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
     await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
 
-    Alert.alert("리셋", "걸음 수를 리셋합니다");
+    // Alert.alert("리셋", "걸음 수를 리셋합니다");
     // 메모리와 로컬 저장소 둘 다 초기화
     setStepCount(0);
     savedRef.current = 0;
