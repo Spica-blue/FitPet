@@ -9,6 +9,7 @@ import { fetchRecommendationByDate } from "../utils/UserAPI";
 
 const HomeScreen = () => {
   const [goalSteps, setGoalSteps] = useState(0);
+  const [currentSteps, setCurrentSteps] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // 날짜 문자열 반환 헬퍼
@@ -69,8 +70,8 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Pedometer goal={goalSteps} />
-      <Pet />
+      <Pedometer goal={goalSteps} onStepCountChange={(steps) => setCurrentSteps(steps)} />
+      <Pet currentSteps={currentSteps} goalSteps={goalSteps} />
     </View>
   );
 };

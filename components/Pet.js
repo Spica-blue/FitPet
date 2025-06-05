@@ -6,6 +6,7 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import styles from "../styles/PetStyle";
+import SatietyBar from "./SatietyBar";
 
 /** ───────────────────────────────────────────────────────────────
  * 1) 상수 정의
@@ -121,7 +122,7 @@ const getIconNameForFood = (foodKey) => ICON_MAP[foodKey] || "food";
  *  - 보관함(inventory) 관리
  * ───────────────────────────────────────────────────────────────
  */
-const Pet = () => {
+const Pet = (props) => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   
@@ -148,41 +149,9 @@ const Pet = () => {
   }, [isFocused]);
 
   // ─────────────────────────────────────────────────────────────
-  // 2) stepCount, goalSteps 불러오기 (AsyncStorage: stepCount_{email}, goalSteps_{email})
-  const [currentSteps, setCurrentSteps] = useState(0);
-  const [goalSteps, setGoalSteps] = useState(10000);
-
-  const loadStepsAndGoal = async () => {
-    const email = await getEmail();
-    if(!email) return;
-
-    // 2-1) goalSteps 읽기
-    const stored = await AsyncStorage.getItem(`goalSteps_${email}`);
-    if(stored){
-      const num = parseInt(stored, 10);
-      if(!isNaN(num) && num > 0){
-        setGoalSteps(num);
-      }
-    }
-
-    // 2-2) stepCount 읽기
-    const storedSteps = await AsyncStorage.getItem(`stepCount_${email}`);
-    if(storedSteps){
-      const s = parseInt(storedSteps, 10);
-      if (!isNaN(s) && s >= 0) {
-        setCurrentSteps(s);
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadStepsAndGoal();
-  }, [isFocused]);
-
-  // ─────────────────────────────────────────────────────────────
   // 3) React state 정의
   const [effect, setEffect] = useState(null);
-  const [satiety, setSatiety] = useState(50);
+  const [satiety, setSatiety] = useState(10);
   const [inventory, setInventory] = useState([]);
   const [animateJson, setAnimateJson] = useState(null);
   const [lastRewardMul, setLastRewardMul] = useState(0);
@@ -191,25 +160,11 @@ const Pet = () => {
   const [isInventoryVisible, setIsInventoryVisible] = useState(false);
 
   // ─────────────────────────────────────────────────────────────
-  // 4) 테스트용 걸음 수 증가 시뮬레이션
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentSteps((prev) => {
-  //       const next = prev + 3000;
-  //       return next > goalSteps * 2 ? goalSteps * 2 : next;
-  //     });
-  //   }, 3000);
-  //   console.log("step:", currentSteps);
-
-  //   return () => clearInterval(timer);
-  // }, [goalSteps]);
-
-  // ─────────────────────────────────────────────────────────────
   // 5) 걸음 수가 바뀔 때마다 “목표 배수” 계산 → inventory에만 무작위 먹이 추가
   useEffect(() => {
-    if(goalSteps <= 0) return;
+    if(props.goalSteps <= 0) return;
 
-    const newMul = Math.floor(currentSteps / goalSteps);
+    const newMul = Math.floor(props.currentSteps / props.goalSteps);
     if(newMul > lastRewardMul){
       // lastRewardMul+1 부터 newMul까지 “먹이 얻기”만 수행
       for(let m=lastRewardMul+1;m<=newMul;m++){
@@ -217,7 +172,7 @@ const Pet = () => {
       }
       setLastRewardMul(newMul);
     }
-  }, [currentSteps, goalSteps]);
+  }, [props.currentSteps, props.goalSteps]);
 
   // ─────────────────────────────────────────────────────────────
   // 6) 포만감이 바뀔 때마다 애니메이션 전환
@@ -359,13 +314,6 @@ const Pet = () => {
             <TouchableOpacity activeOpacity={0.8} onPress={handleCharacterTap}>
               {animateJson && (
                 <LottieView
-                  // source={
-                  //   pet === "happy_dog"
-                  //     ? require("../assets/pet/happy_dog.json") 
-                  //     : pet === "happy_cat"
-                  //     ? require("../assets/pet/happy_cat.json")
-                  //     : require("../assets/pet/smile_emoji.json")
-                  // }
                   source={animateJson}
                   autoPlay
                   loop
@@ -394,10 +342,8 @@ const Pet = () => {
             )}
           </View>
 
-          {/* 12-4) 포만감 & 걸음 수 표시 */}
-          <Text style={styles.satietyText}>
-            포만감 : {satiety} / {MAX_SATIETY}
-          </Text>
+          {/* 12-4) 포만감 레이블 + 바 */}
+          <SatietyBar satiety={satiety} maxSatiety={MAX_SATIETY} />
 
           {/* 12-3) 캐릭터 변경 버튼 */}
           <TouchableOpacity onPress={handlePress} style={styles.changeButton}>

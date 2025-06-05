@@ -6,8 +6,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../styles/PedometerStyle";
 import { sendStepToServer } from "../utils/UserAPI";
 
-const Pedometer = ({ goal = 0 }) => {
-  const [stepCount, setStepCount] = useState(0);
+const Pedometer = ({ goal = 0, onStepCountChange }) => {
+  const [stepCount, setStepCount] = useState(null);
+  const [persistedChecked, setPersistedChecked] = useState(false);
   // const startDateRef = useRef(null); // 테스트용
   const baseStepsRef = useRef(null);
   const savedRef = useRef(0);
@@ -20,6 +21,23 @@ const Pedometer = ({ goal = 0 }) => {
     const parsed = JSON.parse(userInfo);
     return parsed?.email || parsed?.kakao_account?.email || "";
   };
+
+  // *디버그용*: AsyncStorage에 저장된 stepCount_{email} 값을 콘솔에 찍어 줌
+  const logStoredStepCount = async () => {
+    const email = await getEmail();
+    if (!email) return;
+    const key = `stepCount_${email}`;
+    const key2 = `lastResetDate_${email}`;
+    const stored = await AsyncStorage.getItem(key);
+    const stored2 = await AsyncStorage.getItem(key2);
+    console.log(`[디버그] AsyncStorage[${key}] =`, stored);
+    console.log(`[디버그] AsyncStorage[${key2}] =`, stored2);
+  };
+
+  // 매번 화면이 로드될 때(혹은 포커스될 때) AsyncStorage 값을 찍어 봄
+  useEffect(() => {
+    logStoredStepCount();
+  }, []);
 
   // 현재 시각을 한국 표준시(KST)로 변환하여 Date 객체로 반환
   const nowKst = () => {
@@ -38,15 +56,14 @@ const Pedometer = ({ goal = 0 }) => {
     const email = await getEmail();
 
     // const dateKey = todayString();
-    // 어제 날짜를 key 로 사용
-    const yesterday = nowKst();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const today = nowKst();
 
     // 3. YYYY-MM-DD 포맷으로 직접 조합
-    const yyyy = yesterday.getFullYear();
-    const mm = String(yesterday.getMonth() + 1).padStart(2, '0');
-    const dd = String(yesterday.getDate()).padStart(2, '0');
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
     const dateKey = `${yyyy}-${mm}-${dd}`;
+    console.log(dateKey);
     // const dateKey = yesterday.toISOString().slice(0,10);
     // const STEP_KEY = `stepCount_${email}_${dateKey}`;
     const RESET_DATE_KEY = `lastResetDate_${email}`;
@@ -121,9 +138,61 @@ const Pedometer = ({ goal = 0 }) => {
     }
   }
 
+  // 마운트 시: AsyncStorage에서 이전에 저장된 걸음 수 가져와서 state에 세팅
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPersisted = async () => {
+      const email = await getEmail();
+      if(!email){
+        // 이메일이 없으면 그대로 0으로 초기화
+        if(isMounted){
+          setStepCount(0);
+          savedRef.current = 0;
+          setPersistedChecked(true);
+        }
+        return;
+      }
+      const STEP_KEY = `stepCount_${email}`;
+      const saved = await AsyncStorage.getItem(STEP_KEY);
+      
+      if(isMounted){
+        if(saved){
+          const parsed = parseInt(saved, 10);
+          if(!isNaN(parsed)){
+            setStepCount(parsed);
+            savedRef.current = parsed;
+
+            // 부모 콜백 호출
+            if (typeof onStepCountChange === "function") {
+              onStepCountChange(parsed);
+            }
+          }
+          else {
+            setStepCount(0);
+            savedRef.current = 0;
+          }
+        }
+        else {
+          setStepCount(0);
+          savedRef.current = 0;
+        }
+        setPersistedChecked(true);
+      }
+    };
+
+    fetchPersisted();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     // 로컬 캐시 삭제
     // clearDatedStepAndGoalCache();
+    if (!persistedChecked) return;
+
     let subscription;
 
     const subscriptionApp = AppState.addEventListener("change", state => {
@@ -143,12 +212,18 @@ const Pedometer = ({ goal = 0 }) => {
       }
 
       // 계정별 저장된 값 불러우기
-      const saved = await AsyncStorage.getItem(STEP_KEY);
-      if(saved){
-        const parsed = parseInt(saved,10);
-        setStepCount(parsed);
-        savedRef.current = parsed;
-      }
+      // const saved = await AsyncStorage.getItem(STEP_KEY);
+      // if(saved){
+      //   const parsed = parseInt(saved,10);
+      //   if(!isNaN(parsed)){
+      //     setStepCount(parsed);
+      //     savedRef.current = parsed;
+      //     // parent 콜백 호출
+      //     if(typeof onStepCountChange === "function"){
+      //       onStepCountChange(parsed);
+      //     }
+      //   }
+      // }
 
       subscription = ExpoPedometer.watchStepCount(async ({ steps }) => {
         latestStepsRef.current = steps;
@@ -162,6 +237,10 @@ const Pedometer = ({ goal = 0 }) => {
 
         setStepCount(total);
         await AsyncStorage.setItem(STEP_KEY, total.toString());
+
+        if(typeof onStepCountChange === "function"){
+          onStepCountChange(total);
+        }
       });
 
       await checkMissedReset();
@@ -174,7 +253,20 @@ const Pedometer = ({ goal = 0 }) => {
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       subscriptionApp.remove();
     };
-  }, []);
+  }, [persistedChecked]);
+
+  // 아직 AsyncStorage에서 초기값을 가져오기 전이라면 빈 화면을 보여줄 수도 있고, 
+  // 아니면 0으로 대체해도 괜찮습니다. 여기서는  로딩 전에는 0으로 간주합니다.
+  if (stepCount === null) {
+    // (옵션) 로딩 중에는 로딩 텍스트나 스케폴딩 스페이스를 보여줄 수 있습니다.
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>📱 만보기 로딩 중...</Text>
+      </View>
+    );
+  }
+
+  // console.log("count:",stepCount);
 
   return (
     <View style={styles.container}>
