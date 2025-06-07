@@ -88,7 +88,7 @@ export const deleteUserFromServer = async (email) => {
   });
 }
 
-// 유저 정보 서버에 저장
+// 유저 정보(목표 설정) 서버에 저장
 export const sendUserInfoToServer = async (userInfoPayload) => {
   return tryServers(async (SERVER_URL) => {
     const res = await fetchWithTimeout(`${SERVER_URL}/api/users/user-info`, {
@@ -105,6 +105,28 @@ export const sendUserInfoToServer = async (userInfoPayload) => {
     return { success: true };
   });
 }
+
+/**
+ * 유저 정보(목표 설정) 조회
+ * @param {string} email
+ * @returns {Promise<{ success: boolean, data?: { diet_type: string, target_weight: number }, error?: any }>}
+ */
+export const fetchUserInfoFromServer = async (email) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/users/user-info?email=${encodeURIComponent(email)}`);
+    
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('user_info 조회 실패:', err);
+      return { success: false, error: err };
+    }
+    const data = await res.json();
+    // { email, gender, age, height, activity_level, current_weight,
+    //   target_weight, target_date, target_calories, diet_intensity,
+    //   diet_type, allergy, created_at, updated_at }
+    return { success: true, data };
+  });
+};
 
 // gpt에 정보 보내기
 export const requestGptRecommendation = async (userInfoPayload) => {

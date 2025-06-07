@@ -30,7 +30,7 @@ const GoalSetupScreen = () => {
   
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.replace("Onboarding")} style={styles.backStep}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backStep}>
         <Text style={styles.backStepText}>← 뒤로가기</Text>
       </TouchableOpacity>
       {step === 1 && (
