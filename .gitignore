@@ -31,5 +31,8 @@ yarn-error.*
 # local env files
 .env*.local
 
+# 환경 변수 파일
+.env
+
 # typescript
 *.tsbuildinfo
