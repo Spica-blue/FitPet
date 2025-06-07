@@ -303,6 +303,28 @@ export const fetchCalendarNote = async (email, date) => {
   });
 };
 
+/**
+ * @description 이메일에 해당하는 모든 캘린더 노트를 가져옵니다.
+ * @param {string} email
+ * @returns {Promise<{ success: boolean, data?: Array<{ date: string, note: string, workout_success?: boolean }>, error?: any }>}
+ */
+export const fetchAllCalendarNotes = async (email) => {
+  return tryServers(async (SERVER_URL) => {
+    // 날짜 파라미터 없이 호출해서 전체 리스트를 받는다
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/calendar/all?email=${encodeURIComponent(email)}`);
+
+    if (!res.ok) {
+      const error = await res.json();
+      console.error("전체 일기 조회 실패:", error);
+      return { success: false, error };
+    }
+
+    const data = await res.json();
+    // data는 [{ date: '2025-06-07', note: '...', workout_success: true }, ...]
+    return { success: true, data };
+  });
+}
+
 // 일기 삭제
 export const deleteCalendarNote = async (email, date) => {
   return tryServers(async (SERVER_URL) => {

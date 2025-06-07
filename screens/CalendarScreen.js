@@ -4,7 +4,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { fetchCalendarNote, deleteCalendarNote } from '../utils/UserAPI';
+import { fetchCalendarNote, deleteCalendarNote, fetchAllCalendarNotes } from '../utils/UserAPI';
 import Calendar from '../components/Calendar';
 import styles from "../styles/tab/CalendarScreenStyle";
 
@@ -80,15 +80,16 @@ const CalenderScreen = ({ navigation }) => {
     );
   };
 
-  // 로컬에 실제 기록된 날짜에 해당하는 키 markedDates 생성
+  // 실제 기록된 날짜에 해당하는 키 markedDates 생성
   const loadMarks = async () => {
     setLoading(true);
 
-    // 1) 앱에 저장된 모든 키 가져오기
+    const email = await getEmail();
+    const marks = {};
+
+    // 1) 로컬 캐시에서 일기 키 읽기
     const allKeys = await AsyncStorage.getAllKeys();
     console.log('🍱 AsyncStorage Keys:', allKeys);
-
-    const marks = {};
 
     // 2) 일기 작성된 날짜 찾기
     const diaryKeys = allKeys.filter(k => k.startsWith('diary-'));
@@ -101,6 +102,23 @@ const CalenderScreen = ({ navigation }) => {
       }
       marks[dateStr].dots.push({ key: 'diary', color: '#2196F3' });
     });
+
+    // 3) 서버에서 전체 일기 목록 가져오기
+    const res = await fetchAllCalendarNotes(email);
+    if (res.success && Array.isArray(res.data)) {
+      res.data.forEach(({ date }) => {
+        // 로컬에 이미 표시된 날짜는 중복 추가하지 않음
+        if (!marks[date]) {
+          marks[date] = { dots: [] };
+        }
+        // 서버 일기는 파란색 점
+        // (로컬 점이 이미 있으면 두 개가 쌓일 수 있음)
+        marks[date].dots.push({ key: 'diary-server', color: '#2196F3' });
+      });
+    } 
+    else {
+      console.warn('서버 일기 목록 로드 실패:', res.error);
+    }
 
     setMarkedDates(marks);
     setLoading(false);
