@@ -21,6 +21,12 @@ export default StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     backgroundColor: "#f5f5f5",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  cardSelected: {
+    borderColor: "#4CAF50",
+    backgroundColor: "#E8F5E9",
   },
   anim: { 
     width: 100, 
@@ -30,4 +36,19 @@ export default StyleSheet.create({
     marginTop: 4, 
     fontSize: 14 
   },
+  confirmButton: {
+    marginTop: 24,
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    borderRadius: 24,
+    alignItems: "center",
+  },
+  confirmText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  confirmDisabled: {
+    backgroundColor: "#A5D6A7",
+  }
 });

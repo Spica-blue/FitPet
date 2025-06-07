@@ -1,6 +1,6 @@
 const SPRING_URL = "http://192.168.100.196:8883";
-const FASTAPI_URL = "http://192.168.100.190:8883";  
-// const FASTAPI_URL = "http://172.30.1.67:8883";
+// const FASTAPI_URL = "http://192.168.100.190:8883";  
+const FASTAPI_URL = "http://172.30.1.22:8883";
 // const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
@@ -324,3 +324,126 @@ export const deleteCalendarNote = async (email, date) => {
   });
 };
 
+// ─────────────────────────────────────────────────
+// 새 펫(Pet) 정보를 서버에 저장하는 함수 추가
+// - email, pet_type, satiety 값을 서버로 전달
+// ─────────────────────────────────────────────────
+export const sendPetToServer = async ({ email, pet_type, satiety }) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/pet/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, pet_type, satiety }),
+    }, 2000);
+
+    const data = await res.json();
+
+    if(!res.ok){
+      console.error("펫 저장 실패:", data);
+      return { success: false, error: data };
+    }
+
+    console.log("펫 정보 서버 저장 완료:", data);
+    return { success: true, data };
+  });
+};
+
+/**
+ * 서버에서 해당 이메일의 Pet 정보를 가져옵니다.
+ * @param {string} email
+ * @returns {Promise<{ success: boolean, data?: { email, pet_type, satiety, created_at }, error?: any }>}
+ */
+export const fetchPetFromServer = async (email) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/pet/${encodeURIComponent(email)}`, { 
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }, 2000);
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("펫 조회 실패:", data);
+      return { success: false, error: data };
+    }
+
+    console.log("펫 정보 조회 완료:", data);
+    return { success: true, data };
+  });
+};
+
+/**
+ * 펫 정보 업데이트 (satiety, pet_type 등)
+ * @param {{ email: string, pet_type?: string, satiety?: number }} payload
+ */
+export const updatePetOnServer = async ({ email, pet_type, satiety }) => {
+  return tryServers(async (SERVER_URL) => {
+    const body = {};
+    if (pet_type !== undefined) body.pet_type = pet_type;
+    if (satiety !== undefined) body.satiety = satiety;
+
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/pet/${encodeURIComponent(email)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      // satiety 필드는 선택사항으로 처리
+      body: JSON.stringify(body),
+    }, 2000);
+
+    const data = await res.json().catch(() => ({}));
+    
+    if (!res.ok) {
+      console.error("펫 업데이트 실패:", data);
+      return { success: false, error: data };
+    }
+    
+    console.log("✅ 펫 업데이트 완료:", data);
+    return { success: true, data };
+  });
+};
+
+// Feed Inventory 조회
+export const fetchFeedInventory = async (email) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/feed_inventory/${encodeURIComponent(email)}`);
+    if (res.status === 404) {
+      // 없으면 생성
+      await createFeedInventory(email);
+      return { success: true, data: await fetchFeedInventory(email) };
+    }
+    const data = await res.json();
+    return res.ok
+      ? { success: true, data }
+      : { success: false, error: data };
+  });
+};
+
+// Feed Inventory 최초 생성
+export const createFeedInventory = async (email) => {
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/feed_inventory/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    return res.ok
+      ? { success: true, data }
+      : { success: false, error: data };
+  });
+};
+
+// Feed Inventory 업데이트 (먹이 획득/사용)
+export const updateFeedInventoryOnServer = async (email, updatePayload) => {
+  // updatePayload 예: { steak_count: 3 } 또는 { apple_count: prev -1 }
+  return tryServers(async (SERVER_URL) => {
+    const res = await fetchWithTimeout(`${SERVER_URL}/api/feed_inventory/${encodeURIComponent(email)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatePayload),
+    });
+    const data = await res.json();
+    return res.ok
+      ? { success: true, data }
+      : { success: false, error: data };
+  });
+};

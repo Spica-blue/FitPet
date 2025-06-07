@@ -56,14 +56,14 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
     const email = await getEmail();
 
     // const dateKey = todayString();
-    const today = nowKst();
+    const today = todayString();
 
     // 3. YYYY-MM-DD 포맷으로 직접 조합
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const dateKey = `${yyyy}-${mm}-${dd}`;
-    console.log(dateKey);
+    // const yyyy = today.getFullYear();
+    // const mm = String(today.getMonth() + 1).padStart(2, '0');
+    // const dd = String(today.getDate()).padStart(2, '0');
+    // const dateKey = `${yyyy}-${mm}-${dd}`;
+    console.log("today[pedometer]:", today);
     // const dateKey = yesterday.toISOString().slice(0,10);
     // const STEP_KEY = `stepCount_${email}_${dateKey}`;
     const RESET_DATE_KEY = `lastResetDate_${email}`;
@@ -77,7 +77,7 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
     }
 
     // await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
-    await AsyncStorage.setItem(RESET_DATE_KEY, dateKey);
+    await AsyncStorage.setItem(RESET_DATE_KEY, today);
 
     // Alert.alert("리셋", "걸음 수를 리셋합니다");
     // 메모리와 로컬 저장소 둘 다 초기화
@@ -143,6 +143,8 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
     let isMounted = true;
 
     const fetchPersisted = async () => {
+      // 만보기 캐시 삭제
+      // await clearLocalPedometerCache();
       const email = await getEmail();
       if(!email){
         // 이메일이 없으면 그대로 0으로 초기화
@@ -188,8 +190,18 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
     };
   }, []);
 
+  // 만보기 캐시 삭제
+  async function clearLocalPedometerCache() {
+    const email = await getEmail();
+    if (!email) return;
+    const stepKey = `stepCount_${email}`;
+    await AsyncStorage.removeItem(stepKey);
+    console.log(`[디버그] 로컬 캐시 삭제: ${stepKey}`);
+  }
+
   useEffect(() => {
     // 로컬 캐시 삭제
+    // clearLocalPedometerCache();
     // clearDatedStepAndGoalCache();
     if (!persistedChecked) return;
 

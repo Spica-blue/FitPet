@@ -7,6 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import styles from "../styles/PetStyle";
 import SatietyBar from "./SatietyBar";
+import { updatePetOnServer, fetchFeedInventory, updateFeedInventoryOnServer, fetchPetFromServer } from "../utils/UserAPI";
 
 /** ───────────────────────────────────────────────────────────────
  * 1) 상수 정의
@@ -129,6 +130,8 @@ const Pet = (props) => {
   // ─────────────────────────────────────────────────────────────
   // 1) pet 불러오기 (AsyncStorage: pet_{email} 키)
   const [pet, setPet] = useState(null);
+  const [visitedChecked, setVisitedChecked] = useState(false);
+  const [feedInv, setFeedInv] = useState(null);
 
   const getEmail = async () => {
     const ui = await AsyncStorage.getItem('userInfo');
@@ -136,17 +139,153 @@ const Pet = (props) => {
     return p.email || p.kakao_account?.email || '';
   };
 
+  /** 1) 로컬 AsyncStorage에서 pet_{email} 읽어오기 **/
   const loadPet = async () => {
     const email = await getEmail();
     if(!email) return;
 
-    const stored = await AsyncStorage.getItem(`pet_${email}`);
-    if(stored) setPet(stored);
+    // 1) 서버에서 pet_type + satiety 가져오기
+    const { success, data, error } = await fetchPetFromServer(email);
+    if (!success) {
+      console.warn("펫 조회 실패:", error);
+      return;
+    }
+
+    // 2) 로컬 pet 타입이 바뀌었으면 AsyncStorage 갱신
+    const storedPet = await AsyncStorage.getItem(`pet_${email}`);
+    // if(storedPet){
+    //   // *이전 pet 정보와 비교해서 달라졌으면 서버 업데이트도 호출*
+    //   if(data.pet_type !== storedPet){
+    //     // pet이 바뀌었으면 서버에도 업데이트
+    //     const updateResult = await updatePetOnServer({ email, pet_type: storedPet });
+    //     await AsyncStorage.setItem(`pet_${email}`, data.pet_type);
+
+    //     if (!updateResult.success) {
+    //       console.warn("펫 변경 시 서버 업데이트 실패:", updateResult.error);
+    //     }
+    //   }
+    //   // 3) state 에 동기화
+    //   setPet(data.pet_type);
+    //   setSatiety(data.satiety);
+
+    //   // 4) 이제 hunger 체크도 허용
+    //   setVisitedChecked(true);
+    // }
+    // else{
+    //   setPet(null);
+    // }
+    if (storedPet && data.pet_type !== storedPet) {
+      // 서버에 pet_type 업데이트
+      await updatePetOnServer({ email, pet_type: storedPet });
+      data.pet_type = storedPet;
+    }
+
+    // ③ 상태 동기화
+    setPet(data.pet_type);
+    setSatiety(data.satiety);
+    setVisitedChecked(true);  // 이후 hunger 체크 허용
   };
 
+  // Pet 화면이 포커스될 때마다 loadPet 실행
   useEffect(() => {
     loadPet();
   }, [isFocused]);
+
+  // 1) Pet이 로드될 때 inventory 초기화
+  useEffect(() => {
+    const init = async () => {
+      const email = await getEmail();
+      const res = await fetchFeedInventory(email);
+      if (res.success) {
+        setFeedInv(res.data);
+        setInventory(buildArrayFromCounts(res.data)); // 화면용 배열 생성
+      }
+    };
+    init();
+  }, [pet]);
+
+  // 헬퍼: 서버의 counts → 배열 변환
+  const buildArrayFromCounts = (inv) => {
+    const arr = [];
+    Object.entries(inv).forEach(([key, count]) => {
+      if (key.endsWith("_count") && count > 0) {
+        const foodKey = key.replace("_count", "");
+        for (let i = 0; i < count; i++) arr.push(foodKey);
+      }
+    });
+    return arr;
+  };
+
+  // 현재 시각을 한국 표준시(KST)로 변환하여 Date 객체로 반환
+  const nowKst = () => {
+    const d = new Date();
+    return new Date(d.getTime() + 9 * 60 * 60_000);
+  }
+
+  // useEffect(async () => {
+  //   const email = await getEmail();
+  //   const KEY = `lastVisitDate_${email}`;
+  //   const stored = await AsyncStorage.getItem(KEY);
+  //   console.log("last:", stored);
+  // }, []);
+
+  // --- 하루 이상 미접속 시 satiety 감소 처리 ---
+  useEffect(() => {
+    const checkHunger = async () => {
+      if(!visitedChecked || pet == null) return;
+
+      const email = await getEmail();
+      const KEY = `lastVisitDate_${email}`;
+      const stored = await AsyncStorage.getItem(KEY);
+
+      // 오늘 날짜 (KST) YYYY-MM-DD
+      const today = nowKst();
+      today.setHours(0,0,0,0);
+      const todayStr = today.toISOString().slice(0,10);
+
+      // 1) 마지막 방문 날짜가 없으면 → 오늘로만 초기화, 감소 로직은 건너뛰기
+      if (!stored) {
+        await AsyncStorage.setItem(KEY, todayStr);
+        return;
+      }
+      // 2) 이미 오늘 처리했으면 아무 작업 안 함
+      if (stored === todayStr) {
+        return;
+      }
+
+      // 3) 이전 날짜라면 경과일 계산
+      const last = new Date(stored);
+      last.setHours(0,0,0,0);
+      const diffMs = today - last;
+      const daysDiff = Math.floor(diffMs / (24*60*60*1000));
+
+      if (daysDiff > 0) {
+        // // 하루당 10씩 감소
+        // const dropped = daysDiff * 10;
+        // const newSat = Math.max(0, satiety - dropped);
+        // setSatiety(newSat);
+
+        // // 서버에도 갱신 (필요하다면)
+        // await updatePetOnServer({ email, satiety: newSat });
+
+        // // 한 번 감소 처리했으면, 다음 비교를 위해 마지막 방문 날짜를 오늘로 세팅
+        // await AsyncStorage.setItem(KEY, todayStr);
+
+        // 하루당 10씩 감소
+        setSatiety(prev => {
+          const next = Math.max(0, prev - daysDiff * 10);
+          // 서버에도 갱신
+          updatePetOnServer({ email, satiety: next })
+            .catch(e => console.warn("서버 satiety 업데이트 실패", e));
+          return next;
+        });
+        // 마지막 방문을 오늘로 갱신
+        await AsyncStorage.setItem(KEY, todayStr);
+      }
+    };
+
+    checkHunger();
+  }, [visitedChecked]);
 
   // ─────────────────────────────────────────────────────────────
   // 3) React state 정의
@@ -154,25 +293,59 @@ const Pet = (props) => {
   const [satiety, setSatiety] = useState(10);
   const [inventory, setInventory] = useState([]);
   const [animateJson, setAnimateJson] = useState(null);
-  const [lastRewardMul, setLastRewardMul] = useState(0);
+  const [lastRewardMul, setLastRewardMul] = useState(null);
+  const [initialized, setInitialized] = useState(false);
 
   // “먹이 보관함”을 화면 하단에서 토글로 보여줄지 여부
   const [isInventoryVisible, setIsInventoryVisible] = useState(false);
 
   // ─────────────────────────────────────────────────────────────
   // 5) 걸음 수가 바뀔 때마다 “목표 배수” 계산 → inventory에만 무작위 먹이 추가
+  // 1) 하루가 바뀌었으면 lastRewardMul 초기화
   useEffect(() => {
-    if(props.goalSteps <= 0) return;
+    (async () => {
+      const email = await getEmail();
+      const todayKey = `lastVisitDate_${email}`;
+      const lastDate = await AsyncStorage.getItem(todayKey);
+      const todayStr = new Date().toISOString().slice(0,10);
+      if (lastDate !== todayStr) {
+        await AsyncStorage.multiRemove([todayKey, `lastRewardMul_${email}`]);
+        await AsyncStorage.setItem(todayKey, todayStr);
+      }
+    })();
+  }, []);
+
+  // 2) 마운트 시 AsyncStorage 에서 lastRewardMul 불러오기
+  useEffect(() => {
+    (async () => {
+      const email = await getEmail();
+      const stored = await AsyncStorage.getItem(`lastRewardMul_${email}`);
+      setLastRewardMul(stored ? parseInt(stored, 10) : 0);
+      setInitialized(true);
+    })();
+  }, []);
+
+  // 3) goalSteps 배수 달성 시만 먹이 지급
+  useEffect(() => {
+    if (!initialized || props.goalSteps <= 0) return;
 
     const newMul = Math.floor(props.currentSteps / props.goalSteps);
-    if(newMul > lastRewardMul){
-      // lastRewardMul+1 부터 newMul까지 “먹이 얻기”만 수행
-      for(let m=lastRewardMul+1;m<=newMul;m++){
+    if (newMul > lastRewardMul) {
+      for (let m = lastRewardMul + 1; m <= newMul; m++) {
         obtainRandomFood();
       }
       setLastRewardMul(newMul);
+
+      // AsyncStorage에도 꼭 저장!
+      (async () => {
+        const email = await getEmail();
+        await AsyncStorage.setItem(
+          `lastRewardMul_${email}`,
+          newMul.toString()
+        );
+      })();
     }
-  }, [props.currentSteps, props.goalSteps]);
+  }, [props.currentSteps, props.goalSteps, lastRewardMul, initialized]);
 
   // ─────────────────────────────────────────────────────────────
   // 6) 포만감이 바뀔 때마다 애니메이션 전환
@@ -206,7 +379,7 @@ const Pet = (props) => {
   // ─────────────────────────────────────────────────────────────
   // 8) feedPet(foodKey): 보관함에서 선택 시 호출
   //    - 포만감 증가 + inventory에서 해당 아이템 제거
-  const feedPet = (foodKey, index) => {
+  const feedPet = async (foodKey, index) => {
     if(!pet || !FOOD_VALUES[foodKey]) return;
 
     const baseValue = FOOD_VALUES[foodKey];
@@ -226,12 +399,31 @@ const Pet = (props) => {
 
     setSatiety(nextSat);
 
+    // 서버에 satiety 업데이트
+    getEmail().then((email) => {
+      updatePetOnServer({ email, satiety: nextSat })
+        .then(result => {
+          if(!result.success){
+            console.warn("서버에 satiety 업데이트 실패:", result.error);
+          }
+        });
+    });
+
     // 선택한 index의 아이템만 제거
     setInventory((prev) => {
       const arr = [...prev];
       arr.splice(index, 1);
       return arr;
     });
+
+    // 서버 업데이트
+    const email = await getEmail();
+    const field = `${foodKey}_count`;
+    const newCount = (feedInv?.[field] ?? 1) - 1;
+    const res = await updateFeedInventoryOnServer(email, { [field]: newCount });
+    if (res.success) {
+      setFeedInv(res.data);
+    }
 
     Alert.alert(
       "🍽 먹이 주기 성공!",
@@ -242,12 +434,21 @@ const Pet = (props) => {
   // ─────────────────────────────────────────────────────────────
   // 9) obtainRandomFood(): 목표 배수 달성 시 “먹이 얻기”
   //    - inventory 배열에 itemKey만 추가 (포만감 변화 없음)
-  const obtainRandomFood = () => {
+  const obtainRandomFood = async () => {
     const idx = Math.floor(Math.random() * FOOD_LIST.length);
     const randomFood = FOOD_LIST[idx];
 
     // 보관함에 새 먹이 추가
     setInventory((prev) => [...prev, randomFood]);
+
+    // 서버 업데이트
+    const email = await getEmail();
+    const field = `${randomFood}_count`;
+    const newCount = (feedInv?.[field] ?? 0) + 1;
+    const res = await updateFeedInventoryOnServer(email, { [field]: newCount });
+    if (res.success) {
+      setFeedInv(res.data);
+    }
     
     // 토스트 알림 띄우기
     const message = `새 먹이를 얻었습니다: ${randomFood}`;
@@ -302,6 +503,26 @@ const Pet = (props) => {
   const toggleInventory = () => {
     setIsInventoryVisible((prev) => !prev);
   };
+
+  // pet 캐시 삭제
+  async function clearLocalPetCache() {
+    // 1) 저장된 모든 키를 가져와서
+    const allKeys = await AsyncStorage.getAllKeys();
+    // 2) pet_ 로 시작하는 키만 필터
+    const petKeys = allKeys.filter(k => k.startsWith('pet_'));
+    const lastKeys = allKeys.filter(k => k.startsWith('lastVisitDate_'));
+    if (petKeys.length > 0) {
+      // 3) 한 번에 제거
+      await AsyncStorage.multiRemove(petKeys);
+      await AsyncStorage.multiRemove(lastKeys);
+      console.log(`로컬 캐시 삭제: ${petKeys.join(', ')}`);
+      console.log(`로컬 캐시 삭제: ${lastKeys.join(', ')}`);
+    }
+  }
+
+  // useEffect(() => {
+  //   clearLocalPetCache();
+  // }, []);
 
   // ─────────────────────────────────────────────────────────────
   // 13) 최종 렌더링
