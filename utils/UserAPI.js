@@ -1,7 +1,7 @@
 const SPRING_URL = "http://192.168.100.196:8883";
 // const FASTAPI_URL = "http://192.168.100.190:8883";  
-const FASTAPI_URL = "http://172.30.1.22:8883";
-// const FASTAPI_URL = "http://192.168.35.137:8883";   
+// const FASTAPI_URL = "http://172.30.1.22:8883";
+const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
   FASTAPI_URL,  // FastAPI (메인)
@@ -198,35 +198,32 @@ export const sendStepToServer = async (email, stepCount) => {
   })
 };
 
-/** 특정 날짜의 만보기 기록을 조회합니다.
-  * @param {string} email - 사용자 이메일
-  * @param {string} date  - 조회할 날짜 (YYYY-MM-DD)
-  * @returns {Promise<{ success: boolean, data?: { steps: number }, error?: any }>}
-*/
-// 아직 사용 안함
-export const fetchStepByDate = async (email, date) => {
+/**
+ * 지난 기간(시작일 ~ 종료일)의 만보기 기록을 서버에서 조회합니다.
+ * @param {string} email          - 사용자 이메일
+ * @param {string} startDate      - 조회 시작일 "YYYY-MM-DD"
+ * @param {string} endDate        - 조회 종료일 "YYYY-MM-DD"
+ * @returns {Promise<{ success: boolean, data?: Array<{ email: string, step_count: number, date: string }>, error?: any }>}
+ */
+export async function fetchPedometerRecords(email, startDate, endDate) {
   return tryServers(async (SERVER_URL) => {
-    const res = await fetchWithTimeout(`${SERVER_URL}/api/pedometer/record?email=${encodeURIComponent(email)}&date=${date}`);
+    const url = `${SERVER_URL}/api/pedometer/records`
+      + `?email=${encodeURIComponent(email)}`
+      + `&start=${startDate}`
+      + `&end=${endDate}`;
 
-    // 404면 "해당 날짜에 기록 없음"으로 보고 steps = 0
-    if(res.status == 404){
-      return { success: true, data: { steps: 0 } };
+    const res = await fetchWithTimeout(url, {}, 5000);
+    
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('만보기 범위 조회 실패:', err);
+      return { success: false, error: err };
     }
-
-    const data = await res.json();
-    if(!res.ok){
-      console.error("걸음 수 조회 실패: ", data);
-      return { success: false, error: data};
-    }
-
-    // 서버가 { email, date, step_count, ... } 형태로 반환한다고 가정
-    const steps = typeof data.step_count === 'number'
-      ? data.step_count
-      : parseInt(data.step_count, 10) || 0;
-
-    console.log("✅ 걸음 수 조회 완료:", date, steps);
-    return { success: true, data: { steps } };
-  })
+    
+    const list = await res.json();
+    // 서버가 [{ email, step_count, date }, …] 형태로 내려줍니다.
+    return { success: true, data: list };
+  });
 }
 
 /** 

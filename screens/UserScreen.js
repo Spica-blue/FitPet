@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { fetchUserInfoFromServer } from '../utils/UserAPI';
 import styles from "../styles/tab/UserScreenStyle";
+import StepChart from '../components/StepChart';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -98,51 +99,27 @@ const UserScreen = () => {
         </View>
 
         {/* 닉네임 */}
-        <Text style={styles.username}>{nickname}</Text>
-
-        <View style={styles.buttons}>
-          <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.navigate('GoalSetup')}>
-            <Text>목표 변경</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.filledBtn}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={{ color: '#fff' }}>설정</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.username}>{nickname}</Text>  
       </View>
 
       {/* 하단 걸음 차트 */}
       <View style={styles.chartCard}>
         <Text style={styles.chartTitle}>내 걸음 분석</Text>
-        <BarChart
-          data={{
-            labels,
-            // 두 개의 데이터셋을 중첩해서 그리기
-            datasets: [
-              { data: stepsData.slice(0, -1), color: () => 'rgba(200,200,200,1)' },  // 일반
-              { data: [stepsData[stepsData.length - 1]], color: () => '#4CAF50' },    // 오늘
-            ]
-          }}
-          width={screenWidth - 32}
-          height={240}
-          fromZero
-          showValuesOnTopOfBars
-          withHorizontalLines={true}
-          withInnerLines={true}
-          showBarTops={true}
-          chartConfig={{
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            decimalPlaces: 0,
-            propsForLabels: { fontSize: 12 },
-            barPercentage: 0.5,
-            color: (opacity = 1) => `rgba(0,0,0,${opacity * 0.8})`,
-          }}
-          style={{ borderRadius: 12, backgroundColor: '#fff' }}
-        />
+        <StepChart />
       </View>
+
+      <View style={styles.buttons}>
+        <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.navigate('GoalSetup')}>
+          <Text>목표 변경</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.filledBtn}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Text style={{ color: '#fff' }}>설정</Text>
+        </TouchableOpacity>
+      </View>
+
     </ScrollView>
   )
 }

@@ -89,7 +89,6 @@ const SettingsScreen = ({ navigation }) => {
   const options = [
     { key: 'account', label: '계정', value: email },
     { key: 'appInfo', label: '앱 정보', value: '1.0.0 (Build 1)' },
-    { key: 'theme', label: '테마 설정' },
   ];
 
   const renderItem = ({ item }) => (
