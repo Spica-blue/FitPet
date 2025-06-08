@@ -62,7 +62,7 @@ const HomeScreen = () => {
 
   if(loading){
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, styles.loading]}>
         <ActivityIndicator size="large" />
       </View>
     );

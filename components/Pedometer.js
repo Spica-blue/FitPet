@@ -58,14 +58,7 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
     // const dateKey = todayString();
     const today = todayString();
 
-    // 3. YYYY-MM-DD 포맷으로 직접 조합
-    // const yyyy = today.getFullYear();
-    // const mm = String(today.getMonth() + 1).padStart(2, '0');
-    // const dd = String(today.getDate()).padStart(2, '0');
-    // const dateKey = `${yyyy}-${mm}-${dd}`;
     console.log("today[pedometer]:", today);
-    // const dateKey = yesterday.toISOString().slice(0,10);
-    // const STEP_KEY = `stepCount_${email}_${dateKey}`;
     const RESET_DATE_KEY = `lastResetDate_${email}`;
 
     console.log("어제 걸음 수 업로드:", stepCount);
@@ -282,8 +275,7 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📱 만보기 테스트</Text>
-      <Text style={styles.steps}>👣 현재 걸음 수: {stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
+      <Text style={styles.steps}>현재 걸음 수: {stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
     </View>
   );
 };

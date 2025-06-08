@@ -6,4 +6,8 @@ export default StyleSheet.create({
     // alignItems: 'center',
     justifyContent: 'flex-start',
   },
+  loading: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
