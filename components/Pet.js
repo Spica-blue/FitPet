@@ -148,33 +148,22 @@ const Pet = (props) => {
     // 1) 서버에서 pet_type + satiety 가져오기
     const { success, data, error } = await fetchPetFromServer(email);
     if (!success) {
-      console.warn("펫 조회 실패:", error);
+      // console.warn("펫 조회 실패:", error);
+      return;
+    }
+
+    // ★ data가 null이면 아직 서버에 펫이 없는 상태
+    if (data === null) {
+      // 로컬에서 pet 키가 남아있을 수도 있으니 초기화
+      await AsyncStorage.removeItem(`pet_${email}`);
+      setPet(null);
+      setSatiety(0);
+      setVisitedChecked(true);
       return;
     }
 
     // 2) 로컬 pet 타입이 바뀌었으면 AsyncStorage 갱신
     const storedPet = await AsyncStorage.getItem(`pet_${email}`);
-    // if(storedPet){
-    //   // *이전 pet 정보와 비교해서 달라졌으면 서버 업데이트도 호출*
-    //   if(data.pet_type !== storedPet){
-    //     // pet이 바뀌었으면 서버에도 업데이트
-    //     const updateResult = await updatePetOnServer({ email, pet_type: storedPet });
-    //     await AsyncStorage.setItem(`pet_${email}`, data.pet_type);
-
-    //     if (!updateResult.success) {
-    //       console.warn("펫 변경 시 서버 업데이트 실패:", updateResult.error);
-    //     }
-    //   }
-    //   // 3) state 에 동기화
-    //   setPet(data.pet_type);
-    //   setSatiety(data.satiety);
-
-    //   // 4) 이제 hunger 체크도 허용
-    //   setVisitedChecked(true);
-    // }
-    // else{
-    //   setPet(null);
-    // }
     if (storedPet && data.pet_type !== storedPet) {
       // 서버에 pet_type 업데이트
       await updatePetOnServer({ email, pet_type: storedPet });
@@ -315,7 +304,26 @@ const Pet = (props) => {
     })();
   }, []);
 
-  // 3) goalSteps 배수 달성 시만 먹이 지급
+  // 3) 펫이 바뀔 때마다 lastRewardMul을
+  //    '지금까지 달성된 배수'로 초기화
+  useEffect(() => {
+    if (!pet || props.goalSteps <= 0) return;
+
+    (async () => {
+      const email = await getEmail();
+      const key = `lastRewardMul_${email}`;
+
+      // 지금까지 달성된 배수
+      const mul = Math.floor(props.currentSteps / props.goalSteps);
+
+      // AsyncStorage와 state 동기화
+      await AsyncStorage.setItem(key, mul.toString());
+      setLastRewardMul(mul);
+      setInitialized(true);
+    })();
+  }, [pet]);
+
+  // 4) goalSteps 배수 달성 시만 먹이 지급
   useEffect(() => {
     if (!initialized || props.goalSteps <= 0) return;
 
@@ -429,7 +437,7 @@ const Pet = (props) => {
     const randomFood = FOOD_LIST[idx];
 
     // 보관함에 새 먹이 추가
-    setInventory((prev) => [...prev, randomFood]);
+    // setInventory((prev) => [...prev, randomFood]);
 
     // 서버 업데이트
     const email = await getEmail();
@@ -437,19 +445,30 @@ const Pet = (props) => {
     const newCount = (feedInv?.[field] ?? 0) + 1;
     const res = await updateFeedInventoryOnServer(email, { [field]: newCount });
     if (res.success) {
+      // 2) 서버 반영된 새 inventory로 로컬 state 동기화
       setFeedInv(res.data);
+      setInventory(buildArrayFromCounts(res.data));
+
+      // 3) 이 시점에만 “정말로 얻은” 먹이 알림
+      const message = `새 먹이를 얻었습니다: ${randomFood}`;
+      if (Platform.OS === "android") {
+        ToastAndroid.show(message, ToastAndroid.SHORT);
+      } 
+      else {
+        Alert.alert("새 먹이 획득", message);
+      }
     }
     
     // 토스트 알림 띄우기
-    const message = `새 먹이를 얻었습니다: ${randomFood}`;
-    if(Platform.OS === "android"){
-      ToastAndroid.show(message, ToastAndroid.SHORT);
-    }
-    else{
-      // iOS에는 ToastAndroid가 없으므로 간단히 Alert로 대체하거나,
-      // react-native-root-toast 같은 라이브러리를 사용해도 됩니다.
-      Alert.alert("새 먹이 획득", message);
-    }
+    // const message = `새 먹이를 얻었습니다: ${randomFood}`;
+    // if(Platform.OS === "android"){
+    //   ToastAndroid.show(message, ToastAndroid.SHORT);
+    // }
+    // else{
+    //   // iOS에는 ToastAndroid가 없으므로 간단히 Alert로 대체하거나,
+    //   // react-native-root-toast 같은 라이브러리를 사용해도 됩니다.
+    //   Alert.alert("새 먹이 획득", message);
+    // }
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -501,12 +520,16 @@ const Pet = (props) => {
     // 2) pet_ 로 시작하는 키만 필터
     const petKeys = allKeys.filter(k => k.startsWith('pet_'));
     const lastKeys = allKeys.filter(k => k.startsWith('lastVisitDate_'));
+    const mulKeys = allKeys.filter(k => k.startsWith('lastRewardMul_'));
+    
     if (petKeys.length > 0) {
       // 3) 한 번에 제거
       await AsyncStorage.multiRemove(petKeys);
       await AsyncStorage.multiRemove(lastKeys);
+      await AsyncStorage.multiRemove(mulKeys);
       console.log(`로컬 캐시 삭제: ${petKeys.join(', ')}`);
       console.log(`로컬 캐시 삭제: ${lastKeys.join(', ')}`);
+      console.log(`로컬 캐시 삭제: ${mulKeys.join(', ')}`);
     }
   }
 

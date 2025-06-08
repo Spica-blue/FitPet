@@ -401,15 +401,28 @@ export const fetchPetFromServer = async (email) => {
       headers: { "Content-Type": "application/json" },
     }, 2000);
 
-    const data = await res.json();
+    // const data = await res.json();
 
-    if (!res.ok) {
-      console.error("펫 조회 실패:", data);
-      return { success: false, error: data };
+    // if (!res.ok) {
+    //   // console.error("펫 조회 실패:", data);
+    //   return { success: false, error: data };
+    // }
+
+    // console.log("펫 정보 조회 완료:", data);
+    // return { success: true, data };
+    if (res.ok) {
+      const data = await res.json();
+      return { success: true, data };
+    } 
+    
+    if (res.status === 404) {
+      // 아직 펫이 없다는 의미 → 성공으로 간주, data는 null
+      return { success: true, data: null };
     }
 
-    console.log("펫 정보 조회 완료:", data);
-    return { success: true, data };
+    // 그 외는 진짜 에러로 처리
+    const error = await res.json();
+    return { success: false, error };
   });
 };
 

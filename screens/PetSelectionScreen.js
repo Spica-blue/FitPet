@@ -45,13 +45,14 @@ const PetSelectionScreen = () => {
       }
 
       let serverRes;
-      if (petRes.data) {
+      if (petRes.data !== null) {
         // ─── 이미 펫이 있으면 → PUT 으로 업데이트 ─────────────────────
         serverRes = await updatePetOnServer({
           email,
           pet_type: petKey
         });
-      } else {
+      } 
+      else {
         // ─── 새 펫이라면 → POST 로 생성 ─────────────────────────
         serverRes = await sendPetToServer({
           email,
