@@ -8,6 +8,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import styles from "../styles/PetStyle";
 import SatietyBar from "./SatietyBar";
 import { updatePetOnServer, fetchFeedInventory, updateFeedInventoryOnServer, fetchPetFromServer } from "../utils/UserAPI";
+import { formatDateLocal } from "../utils/DateUtils";
 
 /** ───────────────────────────────────────────────────────────────
  * 1) 상수 정의
@@ -241,7 +242,7 @@ const Pet = (props) => {
       // 오늘 날짜 (KST) YYYY-MM-DD
       const today = nowKst();
       today.setHours(0,0,0,0);
-      const todayStr = today.toISOString().slice(0,10);
+      const todayStr = formatDateLocal(today);
 
       // 1) 마지막 방문 날짜가 없으면 → 오늘로만 초기화, 감소 로직은 건너뛰기
       if (!stored) {
@@ -260,17 +261,6 @@ const Pet = (props) => {
       const daysDiff = Math.floor(diffMs / (24*60*60*1000));
 
       if (daysDiff > 0) {
-        // // 하루당 10씩 감소
-        // const dropped = daysDiff * 10;
-        // const newSat = Math.max(0, satiety - dropped);
-        // setSatiety(newSat);
-
-        // // 서버에도 갱신 (필요하다면)
-        // await updatePetOnServer({ email, satiety: newSat });
-
-        // // 한 번 감소 처리했으면, 다음 비교를 위해 마지막 방문 날짜를 오늘로 세팅
-        // await AsyncStorage.setItem(KEY, todayStr);
-
         // 하루당 10씩 감소
         setSatiety(prev => {
           const next = Math.max(0, prev - daysDiff * 10);
@@ -307,7 +297,7 @@ const Pet = (props) => {
       const email = await getEmail();
       const todayKey = `lastVisitDate_${email}`;
       const lastDate = await AsyncStorage.getItem(todayKey);
-      const todayStr = new Date().toISOString().slice(0,10);
+      const todayStr = formatDateLocal(new Date());
       if (lastDate !== todayStr) {
         await AsyncStorage.multiRemove([todayKey, `lastRewardMul_${email}`]);
         await AsyncStorage.setItem(todayKey, todayStr);

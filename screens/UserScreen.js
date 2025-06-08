@@ -15,10 +15,6 @@ const UserScreen = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [serverInfo, setServerInfo] = useState(null);
 
-  // 걸음 데이터 예시
-  const [stepsData] = useState([2000, 4509, 1811, 4103, 2907, 10502, 385]);
-  const labels = ['일','월','화','수','목','금','오늘'];
-
   useEffect(() => {
     const loadUser = async () => {
       const stored = await AsyncStorage.getItem('userInfo');
