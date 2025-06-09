@@ -1,7 +1,7 @@
 const SPRING_URL = "http://192.168.100.196:8883";
-// const FASTAPI_URL = "http://192.168.100.190:8883";  
+const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.22:8883";
-const FASTAPI_URL = "http://192.168.35.137:8883";   
+// const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
   FASTAPI_URL,  // FastAPI (메인)
@@ -338,9 +338,20 @@ export const fetchAllCalendarNotes = async (email) => {
       return { success: false, error };
     }
 
-    const data = await res.json();
-    // data는 [{ date: '2025-06-07', note: '...', workout_success: true }, ...]
-    return { success: true, data };
+    // const data = await res.json();
+    // // data는 [{ date: '2025-06-07', note: '...', workout_success: true }, ...]
+    // console.log("전체 일기 조회 성공:", data);
+    // return { success: true, data };
+    const json = await res.json();
+    // FastAPI: json이 곧 Array<…>, SpringBoot: json.data가 Array<…>
+    const dataList = Array.isArray(json)
+      ? json
+      : (json.data && Array.isArray(json.data))
+        ? json.data
+        : [];
+    
+    console.log("전체 일기 조회 성공:", dataList);
+    return { success: true, data: dataList };
   });
 }
 
@@ -400,16 +411,7 @@ export const fetchPetFromServer = async (email) => {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     }, 2000);
-
-    // const data = await res.json();
-
-    // if (!res.ok) {
-    //   // console.error("펫 조회 실패:", data);
-    //   return { success: false, error: data };
-    // }
-
-    // console.log("펫 정보 조회 완료:", data);
-    // return { success: true, data };
+    
     if (res.ok) {
       const data = await res.json();
       return { success: true, data };
