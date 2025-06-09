@@ -18,7 +18,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.spica.FitPet",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -33,7 +37,10 @@
             "scheme": "fitpet",
             "host": "oauth"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -56,6 +63,9 @@
             "extraMavenRepos": [
               "https://devrepo.kakao.com/nexus/content/groups/public/"
             ]
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
           }
         }
       ],

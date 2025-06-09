@@ -8,7 +8,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import styles from "../styles/PetStyle";
 import SatietyBar from "./SatietyBar";
 import { updatePetOnServer, fetchFeedInventory, updateFeedInventoryOnServer, fetchPetFromServer } from "../utils/UserAPI";
-import { formatDateLocal } from "../utils/DateUtils";
+import { getTodayKstString } from "../utils/DateUtils";
 
 /** ───────────────────────────────────────────────────────────────
  * 1) 상수 정의
@@ -229,9 +229,13 @@ const Pet = (props) => {
       const stored = await AsyncStorage.getItem(KEY);
 
       // 오늘 날짜 (KST) YYYY-MM-DD
-      const today = nowKst();
-      today.setHours(0,0,0,0);
-      const todayStr = formatDateLocal(today);
+      // const today = nowKst();
+      // today.setHours(0,0,0,0);
+      // const todayStr = formatDateLocal(today);
+      const todayStr = getTodayKstString();
+
+      // console.log("today", today);
+      console.log("todaystr", todayStr);
 
       // 1) 마지막 방문 날짜가 없으면 → 오늘로만 초기화, 감소 로직은 건너뛰기
       if (!stored) {
@@ -246,7 +250,9 @@ const Pet = (props) => {
       // 3) 이전 날짜라면 경과일 계산
       const last = new Date(stored);
       last.setHours(0,0,0,0);
-      const diffMs = today - last;
+      // 여기서도 KST 문자열을 Date로 파싱하면 현지 TZ와 무관하게 00:00로 처리
+      const diffMs = new Date(todayStr) - last;
+      // const diffMs = today - last;
       const daysDiff = Math.floor(diffMs / (24*60*60*1000));
 
       if (daysDiff > 0) {
@@ -286,7 +292,8 @@ const Pet = (props) => {
       const email = await getEmail();
       const todayKey = `lastVisitDate_${email}`;
       const lastDate = await AsyncStorage.getItem(todayKey);
-      const todayStr = formatDateLocal(new Date());
+      // const todayStr = formatDateLocal(new Date());
+      const todayStr = getTodayKstString();
       if (lastDate !== todayStr) {
         await AsyncStorage.multiRemove([todayKey, `lastRewardMul_${email}`]);
         await AsyncStorage.setItem(todayKey, todayStr);

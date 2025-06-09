@@ -111,9 +111,12 @@ const CalenderScreen = ({ navigation }) => {
         if (!marks[date]) {
           marks[date] = { dots: [] };
         }
-        // 서버 일기는 파란색 점
-        // (로컬 점이 이미 있으면 두 개가 쌓일 수 있음)
-        marks[date].dots.push({ key: 'diary-server', color: '#2196F3' });
+        // 2) 로컬 점(diary)이 이미 있으면 서버 점은 추가하지 않음
+        // marks[date].dots.push({ key: 'diary-server', color: '#2196F3' });
+        const hasLocal = marks[date].dots.some(dot => dot.key === 'diary');
+        if (!hasLocal) {
+          marks[date].dots.push({ key: 'diary-server', color: '#2196F3' });
+        }
       });
     } 
     else {
