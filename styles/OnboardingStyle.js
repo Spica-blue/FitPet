@@ -29,11 +29,29 @@ const OnboardingStyle = StyleSheet.create({
     paddingHorizontal: 20,
     lineHeight: 24,
   },
+  // dot: {
+  //   backgroundColor: 'rgba(0, 0, 0, .2)',
+  // },
+  // activeDot: {
+  //   backgroundColor: '#d2066c',
+  // },
+  dotContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
   dot: {
-    backgroundColor: 'rgba(0, 0, 0, .2)',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#aaa',
+    marginHorizontal: 4,
   },
   activeDot: {
     backgroundColor: '#d2066c',
+    width: 10,
+    height: 10,
   },
   buttonCircle: {
     width: 100,
@@ -53,7 +71,6 @@ const OnboardingStyle = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 30,
   },
   kakaoButton: {
     width: "90%",
