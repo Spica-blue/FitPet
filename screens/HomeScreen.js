@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import styles from "../styles/tab/HomeScreenStyle";
 import Pet from '../components/Pet';
 import Pedometer from "../components/Pedometer";
 import { fetchRecommendationByDate } from "../utils/UserAPI";
+import CustomProgressBar from '../components/CustomProgressBar';
+import SemiCircleGauge from '../components/SemiCircleGauge';
+
+const { width: screenW } = Dimensions.get('window');
 
 const HomeScreen = () => {
   const [goalSteps, setGoalSteps] = useState(0);
@@ -68,9 +72,34 @@ const HomeScreen = () => {
     );
   }
 
+  const progress = goalSteps > 0 ? currentSteps / goalSteps : 0;
+
   return (
     <View style={styles.container}>
+      {/* 1) 반원 게이지 */}
+      <View style={styles.gaugeWrapper}>
+        <SemiCircleGauge
+          size={screenW * 0.8}
+          strokeWidth={14}
+          backgroundColor="#ddd"
+          fillColor="#4CAF50"
+          progress={Math.min(progress, 1)}
+          animationDuration={600}
+        />
+      </View>
+
       <Pedometer goal={goalSteps} onStepCountChange={(steps) => setCurrentSteps(steps)} />
+
+      {/* 커스텀 프로그레스 바 */}
+      {/* <View style={{ alignItems: 'center', marginTop: 20 }}>
+        <CustomProgressBar
+          progress={Math.min(progress, 1)}
+          barWidth={260}
+          height={12}
+          color="#4CAF50"
+        />
+      </View> */}
+
       <Pet currentSteps={currentSteps} goalSteps={goalSteps} />
     </View>
   );

@@ -275,7 +275,8 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.steps}>현재 걸음 수: {stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
+      <Text style={styles.title}>만보기 걸음 수</Text>
+      <Text style={styles.steps}>{stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
     </View>
   );
 };

@@ -33,6 +33,8 @@ export default function StepChart() {
 
       const res = await fetchPedometerRecords(email, startStr, endStr);
       const recs = res.success ? res.data : [];
+      console.log("recs:", recs);
+
       const map = recs.reduce((acc, r) => {
         acc[r.date] = r.step_count;
         return acc;
