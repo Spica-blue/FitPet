@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, TouchableWithoutFeedback, Text, FlatList, ToastAndroid, Platform, Alert } from "react-native";
+import { View, Image, TouchableOpacity, TouchableWithoutFeedback, Text, FlatList, ToastAndroid, Platform, Alert } from "react-native";
 import LottieView from "lottie-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
@@ -10,10 +10,31 @@ import SatietyBar from "./SatietyBar";
 import { updatePetOnServer, fetchFeedInventory, updateFeedInventoryOnServer, fetchPetFromServer } from "../utils/UserAPI";
 import { getTodayKstString } from "../utils/DateUtils";
 
+import SteakIcon from "../assets/feeds/steak.png";
+import BoneIcon from "../assets/feeds/bone.png";
+import KibbleIcon from "../assets/feeds/kibble.png";
+import FishIcon from "../assets/feeds/fish.png";
+import CatnipIcon from "../assets/feeds/catnip.png";
+import MilkIcon from "../assets/feeds/milk.png";
+import AppleIcon from "../assets/feeds/apple.png";
+import CandyIcon from "../assets/feeds/candy.png";
+import CarrotIcon from "../assets/feeds/carrot.png";
+
 /** ───────────────────────────────────────────────────────────────
  * 1) 상수 정의
  * ───────────────────────────────────────────────────────────────
  */
+const FOOD_LABELS = {
+  steak: "스테이크",
+  bone:  "뼈다귀",
+  kibble:"사료",
+  fish:  "생선",
+  catnip:"캣닢",
+  milk:  "우유",
+  apple: "사과",
+  candy: "사탕",
+  carrot:"당근",
+};
 
 /** ▶ FOOD_VALUES
  *   먹이 아이템별 기본 포만감 증가량 (예시)
@@ -102,15 +123,15 @@ const EFFECT_OFFSETS = {
  *   MaterialCommunityIcons 용 먹이 아이콘 이름 매핑
  */
 const ICON_MAP = {
-  steak: "hamburger",
-  bone: "bone",
-  kibble: "food",
-  fish: "fish",
-  catnip: "flower-tulip",
-  milk: "cup",
-  apple: "apple",
-  candy: "candy",
-  carrot: "carrot",
+  steak: SteakIcon,
+  bone: BoneIcon,
+  kibble: KibbleIcon,
+  fish: FishIcon,
+  catnip: CatnipIcon,
+  milk: MilkIcon,
+  apple: AppleIcon,
+  candy: CandyIcon,
+  carrot: CarrotIcon,
 };
 const getIconNameForFood = (foodKey) => ICON_MAP[foodKey] || "food";
 
@@ -481,32 +502,41 @@ const Pet = (props) => {
   // ─────────────────────────────────────────────────────────────
   // 10) renderInventoryItem: 보관함 아이템 렌더링
   //     - 아이콘 + 이름 표시, 터치 시 Alert
-  const renderInventoryItem = ({ item, index }) => (
-    <TouchableOpacity 
-      style={styles.invItem}
-      onPress={() => {
-        Alert.alert(
-          "먹이 주기",
-          `${item}을(를) 정말 먹이시겠습니까?`,
-          [
-            { text: "취소", style: "cancel"},
-            {
-              text: "예",
-              onPress: () => feedPet(item, index),
-            },
-          ]
-        );
-      }}
-    >
-      <MaterialCommunityIcons
-        name={getIconNameForFood(item)}
-        size={28}
-        color="#00796B"
-        style={styles.invIcon}
-      />
-      <Text style={styles.invText}>{item}</Text>
-    </TouchableOpacity>
-  );
+  const renderInventoryItem = ({ item, index }) => {
+    const icon = getIconNameForFood(item);
+    const label = FOOD_LABELS[item] || item;
+
+    return(
+      <TouchableOpacity 
+        style={styles.invItem}
+        onPress={() => {
+          Alert.alert(
+            "먹이 주기",
+            `${label}을(를) 정말 먹이시겠습니까?`,
+            [
+              { text: "취소", style: "cancel"},
+              {
+                text: "예",
+                onPress: () => feedPet(item, index),
+              },
+            ]
+          );
+        }}
+      >
+        {/* <MaterialCommunityIcons
+          name={getIconNameForFood(item)}
+          size={28}
+          color="#00796B"
+          style={styles.invIcon}
+        /> */}
+        <Image
+          source={icon}
+          style={[styles.invIcon, { width: 50, height: 30, resizeMode: "contain" }]}
+        />
+        <Text style={styles.invText}>{label}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   // ─────────────────────────────────────────────────────────────
   // 11) 캐릭터 변경 화면으로 이동

@@ -1,12 +1,18 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
 
 const PetStyle = StyleSheet.create({
   // ───────────────────────────────────────────────────────────────
   // 전체 화면 컨테이너
   container: {
-    flex: 1,
+    position: "absolute",
+    // flex: 1,
     // backgroundColor: "#fff",
     padding: 16,
+    width: width,
+    bottom: 0
+    // borderWidth: 1
   },
 
   // ───────────────────────────────────────────────────────────────
@@ -51,8 +57,9 @@ const PetStyle = StyleSheet.create({
   satietyRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 12,   // 위아래 여백
+    marginVertical: 15,   // 위아래 여백
     width: "80%",         // 가로폭 80%
+    marginLeft: 10,
   },
   satietyLabel: {
     fontSize: 16,
@@ -66,8 +73,8 @@ const PetStyle = StyleSheet.create({
   satietyContainer: {
     flex: 1,                  // 남은 공간 모두 차지
     height: 20,               // 막대 높이
-    borderWidth: 1,           // 테두리 두께
-    borderColor: "#8D6E63",   // 짙은 브라운 테두리
+    // borderWidth: 1,           // 테두리 두께
+    // borderColor: "#8D6E63",   // 짙은 브라운 테두리
     borderRadius: 8,          // 모서리 둥글게
     backgroundColor: "#FFF3E0", // 연한 베이지 배경(항상 고정)
     overflow: "hidden",       // 채움이 바깥으로 삐져나오지 않도록
