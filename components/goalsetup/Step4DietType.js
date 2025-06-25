@@ -160,9 +160,17 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
       </TouchableOpacity>
 
       {loading && (
-        <View style={{ marginVertical: 24, alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={{ marginTop: 12, fontSize: 16 }}>AI 추천을 생성 중입니다...</Text>
+        // <View style={{ marginVertical: 24, alignItems: 'center' }}>
+        //   <ActivityIndicator size="large" color="#007AFF" />
+        //   <Text style={{ marginTop: 12, fontSize: 16 }}>AI 추천을 생성 중입니다...</Text>
+        // </View>
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={styles.loadingText}>
+              AI 식단/운동 추천 중...{"\n"}(약 30초 소요)
+            </Text>
+          </View>
         </View>
       )}
     </View>

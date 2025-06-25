@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import styles from "../../styles/MealStyles";
 
-const BreakfastInput = ({ value, onChange, onSave }) => {
+const BreakfastInput = ({ value, onChange }) => {
   return (
     <View style={styles.mealContainer}>
       <View style={styles.mealHeader}>
@@ -13,13 +13,13 @@ const BreakfastInput = ({ value, onChange, onSave }) => {
 
       <TextInput
         style={styles.textInput}
-        placeholder="아침에 먹은 식단을 입력하세요"
+        placeholder="오늘 아침에 드신 식단을 입력하세요"
         multiline
         value={value}
         onChangeText={onChange}
       />
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.saveButton}
         onPress={async () => {
           try {
@@ -32,7 +32,7 @@ const BreakfastInput = ({ value, onChange, onSave }) => {
         }}
       >
         <Text style={styles.saveButtonText}>저장</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   )
 }

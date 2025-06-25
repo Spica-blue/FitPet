@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +10,9 @@ import DinnerInput from '../components/record/DinnerInput';
 import RecommendationCard from '../components/record/RecommendationCard';
 import { fetchDietByDate, fetchRecommendationByDate, saveDiet } from '../utils/UserAPI';
 import styles from "../styles/tab/RecordScreenStyle";
-import { me } from '@react-native-kakao/user';
+// import { me } from '@react-native-kakao/user';
+
+const { width: screenW } = Dimensions.get('window');
 
 const RecordScreen = () => {
   const [date, setDate] = useState(new Date());
@@ -67,6 +69,26 @@ const RecordScreen = () => {
       next.setDate(next.getDate() + offset);
       return next;
     });
+  };
+
+  // 공용 저장
+  const handleSaveAll = async () => {
+    try{
+      const userInfo = await AsyncStorage.getItem('userInfo');
+      const parsed = JSON.parse(userInfo);
+      const email = parsed?.email || parsed?.kakao_account?.email || '';
+      
+      const res = await saveDiet({ email, date: formatted, ...meals });
+      if(!res.success) throw res.error;
+
+      // 로컬 상태도 업데이트
+      // setMeals(prev => ({ ...prev, ...meals }));
+      
+      Alert.alert('저장 완료', '오늘의 식단이 저장되었습니다.');
+    }catch(e){
+      console.error(e);
+      Alert.alert('저장 실패', '서버 에러가 발생했습니다.');
+    }
   };
 
   // === 아침 식단만 저장하는 핸들러 ===
@@ -137,33 +159,44 @@ const RecordScreen = () => {
       style={styles.container}
     >
       <View style={styles.dateHeader}>
-        <AntDesign name="left" size={24} onPress={() => changeDate(-1)} />
+        <AntDesign name="left" size={28} onPress={() => changeDate(-1)} />
         <Text style={styles.dateText}>{formatted}</Text>
-        <AntDesign name="right" size={24} onPress={() => changeDate(1)} />
+        <AntDesign name="right" size={28} onPress={() => changeDate(1)} />
       </View>
 
       {loading
-        ? <ActivityIndicator style={{ marginTop: 50 }} size="large" />
+        ? <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#4A90E2" />
         :
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView 
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <RecommendationCard recommendation={recommendation} />
+          
           <BreakfastInput
             value={meals.breakfast}
             onChange={text => setMeals(m => ({ ...m, breakfast: text }))}
-            onSave={handleSaveBreakfast}
+            // onSave={handleSaveBreakfast}
           />
           <LunchInput
             value={meals.lunch}
             onChange={text => setMeals(m => ({ ...m, lunch: text }))}
-            onSave={handleSaveLunch}
+            // onSave={handleSaveLunch}
           />
           <DinnerInput
             value={meals.dinner}
             onChange={text => setMeals(m => ({ ...m, dinner: text }))}
-            onSave={handleSaveDinner}
+            // onSave={handleSaveDinner}
           />
         </ScrollView>
       }
+
+      {/* 공용 저장 버튼 */}
+      {!loading && (
+        <TouchableOpacity style={styles.saveAllButton} onPress={handleSaveAll}>
+          <Text style={styles.saveAllButtonText}>전체 저장하기</Text>
+        </TouchableOpacity>
+      )}
     </GestureRecognizer>
   )
 }

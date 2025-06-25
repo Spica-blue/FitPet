@@ -9,14 +9,21 @@ const GptResultComponent = ({ route }) => {
 
   if(!result || !result.식단) return null;
 
-  return (
-    <View style={styles.resultContainer}>
-      <Text style={styles.resultTitle}>AI 추천 식단</Text>
+  const formatCell = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/\)\s*,\s*/g, ')\n')   // “),” → “)\n”
+      .replace(/\s*\(\s*/g, '\n(');   // “(” 앞에 줄바꿈
+  };
 
-      <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>AI 추천 식단(7일)</Text>
+
+      <ScrollView style={styles.list} nestedScrollEnabled>
         <View style={styles.table}>
           <View style={styles.tableRow}>
-            <Text style={styles.tableHeader}>일</Text>
+            <Text style={styles.tableHeader}>날짜</Text>
             <Text style={styles.tableHeader}>아침</Text>
             <Text style={styles.tableHeader}>점심</Text>
             <Text style={styles.tableHeader}>저녁</Text>
@@ -24,22 +31,24 @@ const GptResultComponent = ({ route }) => {
           {Object.keys(result.식단).map((day, index) => (
             <View key={index} style={styles.tableRow}>
               <Text style={styles.tableCell}>{day}</Text>
-              <Text style={styles.tableCell}>{result.식단[day].아침}</Text>
-              <Text style={styles.tableCell}>{result.식단[day].점심}</Text>
-              <Text style={styles.tableCell}>{result.식단[day].저녁}</Text>
+              <Text style={styles.tableCell}>{formatCell(result.식단[day].아침)}</Text>
+              <Text style={styles.tableCell}>{formatCell(result.식단[day].점심)}</Text>
+              <Text style={styles.tableCell}>{formatCell(result.식단[day].저녁)}</Text>
             </View>
           ))}
         </View>
       </ScrollView>
 
       {result.운동 && (
-        <View style={styles.exerciseContainer}>
-          <Text style={styles.exerciseTitle}>AI 추천 운동 목표</Text>
-          <View style={styles.exerciseRow}>
-            <Text style={styles.exerciseLabel}>하루 목표 빠른 걸음 수:</Text>
-            <Text style={styles.exerciseValue}>{result.운동['하루 목표 빠른 걸음 수']}</Text>
+        <>
+          <Text style={styles.title}>AI 추천 운동 목표</Text>
+          <View style={styles.exercise}>
+            <View style={styles.exerciseRow}>
+              <Text style={styles.exerciseLabel}>하루 목표 빠른 걸음 수:</Text>
+              <Text style={styles.exerciseValue}>{result.운동['하루 목표 빠른 걸음 수']}</Text>
+            </View>
           </View>
-        </View>
+        </>
       )}
 
       <TouchableOpacity
