@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 import { fetchUserInfoFromServer } from '../utils/UserAPI';
 import styles from "../styles/tab/UserScreenStyle";
@@ -62,7 +61,7 @@ const UserScreen = () => {
     // <View style={styles.container}>
     //   <Account navigation={navigation} />
     // </View>
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       {/* 상단 프로필 영역 */}
       <View style={styles.profileCard}>
         <View style={styles.statsRow}>
@@ -129,7 +128,7 @@ const UserScreen = () => {
         </TouchableOpacity>
       </View>
 
-    </ScrollView>
+    </View>
   )
 }
 

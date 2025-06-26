@@ -90,10 +90,6 @@ const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
   
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBack} style={styles.backButton}>
-        <Text style={styles.backButtonText}>←</Text>
-      </TouchableOpacity>
-
       <Text style={styles.title}>추천 계획 완성!{'\n'}목표를 바꿀 수도 있어요</Text>
 
       <View style={styles.inputBlock}>
@@ -129,13 +125,25 @@ const Step3GoalCalories = ({ data, setData, onNext, onBack }) => {
         ))}
       </View>
 
-      <TouchableOpacity
-        style={[styles.nextButton, !isValid && styles.disabledButton]}
-        onPress={handleNext}
-        disabled={!isValid}
-      >
-        <Text style={styles.nextButtonText}>다음</Text>
-      </TouchableOpacity>
+      {/* 버튼 Row: 이전 & 다음 */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.pairButton, styles.prevButton]}
+          onPress={onBack}
+        >
+          <Text style={styles.prevButtonText}>이전</Text>
+        </TouchableOpacity>
+
+        <View style={styles.pairButtonSpacer} />
+
+        <TouchableOpacity
+          style={[styles.pairButton, styles.nextButton, !isValid && styles.disabledButton]}
+          onPress={handleNext}
+          disabled={!isValid}
+        >
+          <Text style={styles.nextButtonText}>다음</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }

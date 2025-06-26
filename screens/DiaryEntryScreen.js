@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Switch, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Switch, Button, Alert, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from "../styles/DiaryStyle";
 import { saveCalendarNote, fetchCalendarNote } from '../utils/UserAPI';
@@ -71,24 +71,40 @@ const DiaryEntryScreen = ({ route, navigation }) => {
   // };
   
   return (
-    <View style={styles.container}>
+    // 키보드가 올라올 때 모달도 살짝 위로 밀어주기
+    <KeyboardAvoidingView
+      behavior={Platform.select({ ios: 'padding', android: undefined })}
+      style={{ flex: 1 }}
+    >
+      {/* 1. 상단 헤더 */}
       <Text style={styles.header}>{date} 일기</Text>
+
+      {/* 2. 일기 입력란: 고정된 maxHeight 안에서만 스크롤 */}
       <TextInput
         style={styles.input}
         multiline
-        placeholder='오늘의 일상을 기록해보세요.'
+        placeholder="오늘의 일상을 기록해보세요."
         value={note}
         onChangeText={setNote}
+        scrollEnabled={true}        // TextInput 자체 스크롤 켬
+        textAlignVertical="top"
       />
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12 }}>
-        <Text>운동 성공 여부: </Text>
+
+      {/* 3. 운동 토글 */}
+      <View style={styles.switchContainer}>
+        <Text style={styles.switchLabel}>운동 성공 여부: </Text>
         <Switch
           value={workoutSuccess}
           onValueChange={setWorkoutSuccess}
         />
       </View>
-      <Button title='저장' onPress={onSave} />
-    </View>
+
+      {/* 4. 저장 버튼 */}
+      {/* <Button title='저장' onPress={onSave} /> */}
+      <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+        <Text style={styles.saveButtonText}>저장하기</Text>
+      </TouchableOpacity>
+    </KeyboardAvoidingView>
   )
 }
 

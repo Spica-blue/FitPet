@@ -119,7 +119,7 @@ const SettingsScreen = ({ navigation }) => {
           style={[styles.btn, styles.unlinkBtn]}
           onPress={handleUnlink}
         >
-          <Text style={styles.btnText}>연결 끊기</Text>
+          <Text style={styles.btnText}>탈퇴하기</Text>
         </TouchableOpacity>
       </View>
     </View>

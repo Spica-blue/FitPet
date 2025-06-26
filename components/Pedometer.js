@@ -9,6 +9,8 @@ import { sendStepToServer } from "../utils/UserAPI";
 const Pedometer = ({ goal = 0, onStepCountChange }) => {
   const [stepCount, setStepCount] = useState(null);
   const [persistedChecked, setPersistedChecked] = useState(false);
+  // 화면 새로고침용 key
+  const [refreshKey, setRefreshKey] = useState(0);
   // const startDateRef = useRef(null); // 테스트용
   const baseStepsRef = useRef(null);
   const savedRef = useRef(0);
@@ -60,6 +62,7 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
 
     console.log("today[pedometer]:", today);
     const RESET_DATE_KEY = `lastResetDate_${email}`;
+    const STEP_KEY = `stepCount_${email}`;
 
     console.log("어제 걸음 수 업로드:", stepCount);
     const response = await sendStepToServer(email, stepCount);
@@ -71,12 +74,16 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
 
     // await AsyncStorage.setItem(STEP_KEY, stepCount.toString());
     await AsyncStorage.setItem(RESET_DATE_KEY, today);
+    await AsyncStorage.setItem(STEP_KEY, "0");
 
     // Alert.alert("리셋", "걸음 수를 리셋합니다");
     // 메모리와 로컬 저장소 둘 다 초기화
     setStepCount(0);
     savedRef.current = 0;
     baseStepsRef.current = latestStepsRef.current;
+
+    // refreshKey 증가 → 컴포넌트 remount
+    setRefreshKey(k => k + 1);
   }
 
   // 다음 자정을 기준으로 한 번만 타이머를 예약
@@ -274,7 +281,7 @@ const Pedometer = ({ goal = 0, onStepCountChange }) => {
   // console.log("count:",stepCount);
 
   return (
-    <View style={styles.container}>
+    <View key={refreshKey} style={styles.container}>
       <Text style={styles.title}>만보기 걸음 수</Text>
       <Text style={styles.steps}>{stepCount.toLocaleString()} / {goal.toLocaleString()}</Text>
     </View>

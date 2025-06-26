@@ -79,11 +79,38 @@ const StepStyle = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  prevButton: {
+    flex: 1,
+    marginRight: 8,
+    paddingVertical: 14,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  prevButtonText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
   nextButton: {
     backgroundColor: '#111',
     paddingVertical: 14,
     borderRadius: 24,
     alignItems: 'center',
+  },
+  /* 두 버튼이 나올 때만 flex:1 을 주기 위한 스타일 */
+  pairButton: {
+    flex: 1,
+  },
+  pairButtonSpacer: {
+    width: 8,
   },
   disabledButton: {
     backgroundColor: '#aaa',

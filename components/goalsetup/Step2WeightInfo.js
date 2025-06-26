@@ -29,10 +29,6 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBack} style={styles.backButton}>
-        <Text style={styles.backButtonText}>←</Text>
-      </TouchableOpacity>
-
       <Text style={styles.title}>목표 체중도 알려주시면{'\n'}추천 계획을 짜볼게요</Text>
 
       {/* 시작 체중 */}
@@ -64,20 +60,6 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
           <Text style={styles.unitText}>kg</Text>
         </View>
       </View>
-
-      {/* 목표 기간 */}
-      {/* <View style={styles.inputBlock}>
-        <Text style={styles.inputLabel}>언제까지 달성하고 싶나요?(선택)</Text>
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="예: 2025-07-01"
-            value={localData.targetDate}
-            onChangeText={(text) => handleChange('targetDate', text)}
-          />
-          <Text style={styles.unitText}>까지</Text>
-        </View>
-      </View> */}
       
       {/* BMI 경고 */}
       {heightNum && localData.targetWeight && !isInSafeRange && (
@@ -87,13 +69,25 @@ const Step2WeightInfo = ({ data, setData, onNext, onBack }) => {
         </Text>
       )}
 
-      <TouchableOpacity
-        style={[styles.nextButton, !isValid && styles.disabledButton]}
-        onPress={handleNext}
-        disabled={!isValid}
-      >
-        <Text style={styles.nextButtonText}>다음</Text>
-      </TouchableOpacity>
+      {/* 버튼 Row: 이전 & 다음 */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.pairButton, styles.prevButton]}
+          onPress={onBack}
+        >
+          <Text style={styles.prevButtonText}>이전</Text>
+        </TouchableOpacity>
+
+        <View style={styles.pairButtonSpacer} />
+
+        <TouchableOpacity
+          style={[styles.pairButton, styles.nextButton, !isValid && styles.disabledButton]}
+          onPress={handleNext}
+          disabled={!isValid}
+        >
+          <Text style={styles.nextButtonText}>다음</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }

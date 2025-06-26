@@ -1,3 +1,4 @@
+import { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +9,7 @@ import { LocaleConfig } from 'react-native-calendars';
 import Constants from 'expo-constants';
 import NaverLogin from '@react-native-seoul/naver-login';
 
+import PullToRefresh from './components/PullToRefresh';
 import TabNavigator from './navigation/TabNavigator';
 import HomeScreen from './screens/HomeScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -15,7 +17,6 @@ import GoalSetupScreen from './screens/GoalSetupScreen';
 import GptResultScreen from "./screens/GptResultScreen";
 import Pet from './components/Pet';
 import SpringTest from "./screens/SpringTest";
-import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DiaryEntryScreen from './screens/DiaryEntryScreen';
 import PetSelectionScreen from './screens/PetSelectionScreen';
@@ -59,6 +60,8 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [initialRoute, setInitialRoute] = useState('Onboarding');
 
+  const navigationRef = useRef();
+
   useEffect(() => {
     const checkLogin = async () => {
       const userInfo = await AsyncStorage.getItem('userInfo');
@@ -79,29 +82,57 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" translucent={true} backgroundColor="transparent" />
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-            <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
-            <Stack.Screen name="GptResult" component={GptResultScreen} />
-            <Stack.Screen name="Main" component={TabNavigator} />
-            {/* Settings는 탭 바 숨기고 뒤로가기 헤더만 표시 */}
-            <Stack.Screen
-              name="Settings"
-              component={SettingsScreen}
-              options={{
-                headerShown: true,
-                headerTitle: '설정',
-                headerBackTitle: '뒤로',
-              }}
-            />
-            <Stack.Screen name="DiaryEntry" component={DiaryEntryScreen} />
-            <Stack.Screen name="PetSelection" component={PetSelectionScreen} options={{ title: "캐릭터 선택" }} />
-            {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
-            {/* <Stack.Screen name="Pet" component={Pet} /> */}
-          </Stack.Navigator>
-        </NavigationContainer>
+        {/* <PullToRefresh
+          onRefresh={async () => {
+            // 현재 라우트 다시 네비게이트해서 remount
+            const current = navigationRef.current.getCurrentRoute()?.name;
+            if(current){
+              navigationRef.current.reset({
+                index: 0,
+                routes: [{ name: current }],
+              });
+            }
+          }}
+        > */}
+          <NavigationContainer ref={navigationRef}>
+            <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="GoalSetup" component={GoalSetupScreen} />
+              <Stack.Screen name="GptResult" component={GptResultScreen} />
+              <Stack.Screen name="Main">
+                {props => (
+                  <PullToRefresh
+                    onRefresh={async () => {
+                      const current = navigationRef.current.getCurrentRoute()?.name;
+                      if(current){
+                        navigationRef.current.reset({
+                          index: 0,
+                          routes: [{ name: current }],
+                        });
+                      }
+                    }}
+                  >
+                    <TabNavigator {...props} />
+                  </PullToRefresh>
+                )}
+              </Stack.Screen>
+              {/* Settings는 탭 바 숨기고 뒤로가기 헤더만 표시 */}
+              <Stack.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{
+                  headerShown: true,
+                  headerTitle: '설정',
+                  headerBackTitle: '뒤로',
+                }}
+              />
+              <Stack.Screen name="DiaryEntry" component={DiaryEntryScreen} />
+              <Stack.Screen name="PetSelection" component={PetSelectionScreen} options={{ title: "캐릭터 선택" }} />
+              {/* <Stack.Screen name="SpringTest" component={SpringTest} /> */}
+              {/* <Stack.Screen name="Pet" component={Pet} /> */}
+            </Stack.Navigator>
+          </NavigationContainer>
+        {/* </PullToRefresh> */}
       </SafeAreaView>
     </SafeAreaProvider>
   );

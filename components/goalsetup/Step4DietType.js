@@ -94,10 +94,6 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBack} style={styles.backButton}>
-        <Text style={styles.backButtonText}>←</Text>
-      </TouchableOpacity>
-
       <Text style={styles.title}>
         마지막으로 식단 계획 선택!{'\n'}식단에 맞는 탄단지 섭취량도 계산해 볼게요
       </Text>
@@ -151,13 +147,25 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity
-        style={[styles.nextButton, !selectedType && styles.disabledButton]}
-        onPress={handleNext}
-        disabled={!selectedType}
-      >
-        <Text style={styles.nextButtonText}>완료</Text>
-      </TouchableOpacity>
+      {/* 버튼 Row: 이전 & 다음 */}
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.pairButton, styles.prevButton]}
+          onPress={onBack}
+        >
+          <Text style={styles.prevButtonText}>이전</Text>
+        </TouchableOpacity>
+
+        <View style={styles.pairButtonSpacer} />
+
+        <TouchableOpacity
+          style={[styles.pairButton, styles.nextButton, !selectedType && styles.disabledButton]}
+          onPress={handleNext}
+          disabled={!selectedType}
+        >
+          <Text style={styles.nextButtonText}>완료</Text>
+        </TouchableOpacity>
+      </View>
 
       {loading && (
         // <View style={{ marginVertical: 24, alignItems: 'center' }}>

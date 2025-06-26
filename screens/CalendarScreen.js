@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Button, ActivityIndicator, AppState, Alert, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ActivityIndicator, AppState, Alert, TouchableOpacity, ScrollView, Dimensions, Modal, Pressable } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchCalendarNote, deleteCalendarNote, fetchAllCalendarNotes } from '../utils/UserAPI';
 import Calendar from '../components/Calendar';
 import styles from "../styles/tab/CalendarScreenStyle";
+import { modalStyles } from '../styles/ModalStyle';
+import DiaryEntryScreen from './DiaryEntryScreen';
 
 const { height: screenH } = Dimensions.get('window');
 
@@ -19,6 +21,7 @@ const CalenderScreen = ({ navigation }) => {
   const [diary, setDiary] = useState(null);
   const [workoutSuccess, setWorkoutSuccess] = useState(null);
   const [loadingDiary, setLoadingDiary] = useState(false);
+  const [isDiaryModalVisible, setDiaryModalVisible] = useState(false);
 
   const appState = useRef(AppState.currentState);
   const isFocused = useIsFocused();
@@ -181,12 +184,21 @@ const CalenderScreen = ({ navigation }) => {
     // setSelectedDate(null);
   };
 
-  console.log("selecteddate : ", selectedDate);
-
   // GestureRecognizer 설정
   const swipeConfig = {
     velocityThreshold: 0.3,
     directionalOffsetThreshold: 80,
+  };
+
+  const openDiaryModal = dateString => {
+    setSelectedDate(dateString);
+    setDiaryModalVisible(true);
+  };
+
+  const closeDiaryModal = () => {
+    setDiaryModalVisible(false);
+    // 모달에서 저장하고 돌아왔으므로, 다시 일기 로드
+    loadDiary(selectedDate);
   };
 
   return (
@@ -224,17 +236,6 @@ const CalenderScreen = ({ navigation }) => {
                 />
               );
             })()}
-            {/* <Calendar
-              key={currentDate.toISOString().slice(0, 7)}
-              // 현재 렌더링할 월 지정 (YYYY-MM-DD)
-              current={currentDate.toISOString().slice(0, 10)}
-              markingType="custom"
-              markedDates={markedDates}
-              onDayPress={onDayPress}
-              // onDayPress={({ dateString }) => {
-              //   navigation.navigate('DiaryEntry', { date: dateString })
-              // }}
-            /> */}
           </View>
 
           {selectedDate && (
@@ -261,11 +262,13 @@ const CalenderScreen = ({ navigation }) => {
                   </Text>
                   
                   <View style={styles.buttonRow}>
+                    {/* “수정” 버튼을 눌렀을 때 모달 오픈 */}
                     <TouchableOpacity
                       style={styles.primaryButton}
-                      onPress={() =>
-                        navigation.navigate('DiaryEntry', { date: selectedDate })
-                      }
+                      // onPress={() =>
+                      //   navigation.navigate('DiaryEntry', { date: selectedDate })
+                      // }
+                      onPress={() => openDiaryModal(selectedDate)}
                     >
                       <Text style={styles.primaryButtonText}>수정</Text>
                     </TouchableOpacity>
@@ -279,39 +282,44 @@ const CalenderScreen = ({ navigation }) => {
                   </View>
                 </View>
               ) : (
-                // <Button
-                //   title="일기 쓰기"
-                //   onPress={() =>
-                //     navigation.navigate('DiaryEntry', { date: selectedDate })
-                //   }
-                // />
                 <View style={styles.emptyContainer}>
+                  {/* “일기 쓰기” 버튼을 눌렀을 때 모달 오픈 */}
                   <TouchableOpacity
                     style={styles.emptyButton}
-                    onPress={() =>
-                      navigation.navigate('DiaryEntry', { date: selectedDate })
-                    }
+                    // onPress={() =>
+                    //   navigation.navigate('DiaryEntry', { date: selectedDate })
+                    // }
+                    onPress={() => openDiaryModal(selectedDate)}
                   >
                     <Text style={styles.emptyButtonText}>일기 쓰기</Text>
                   </TouchableOpacity>
                 </View>
               )
-            // {/* </View> */}
           )}
-
-          {/* {selectedDate && (
-            <View style={styles.footer}>
-              <Text style={styles.dateLabel}>
-                {selectedDate} 일기
-              </Text>
-              <Button
-                title='일기 쓰기'
-                onPress={() => navigation.navigate('DiaryEntry', { date: selectedDate })}
-              />
-            </View>
-          )} */}
         </GestureRecognizer>
       )}
+      <Modal
+        visible={isDiaryModalVisible}
+        transparent
+        animationType='slide'
+        onRequestClose={closeDiaryModal}
+      >
+        <Pressable
+          style={modalStyles.backdrop}
+          onPress={closeDiaryModal}
+        >
+          <Pressable onPress={() => { /* do nothing */ }} style={modalStyles.modalCard}>
+            <DiaryEntryScreen
+              route={{ params: { date: selectedDate } }}
+              navigation={{ goBack: closeDiaryModal }}
+            />
+          </Pressable>
+        </Pressable>
+        {/* <View style={modalStyles.backdrop}>
+          <View style={modalStyles.modalCard}>
+          </View>
+        </View> */}
+      </Modal>
     </View>
   )
 }

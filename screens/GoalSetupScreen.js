@@ -30,8 +30,9 @@ const GoalSetupScreen = () => {
   
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backStep}>
-        <Text style={styles.backStepText}>← 뒤로가기</Text>
+      {/* ① 전체 스텝을 나가는 상단 뒤로가기 */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.globalBack}>
+        <Text style={styles.globalBackText}>←</Text>
       </TouchableOpacity>
       {step === 1 && (
         <Step1BasicInfo data={formData} setData={setFormData} onNext={nextStep} />

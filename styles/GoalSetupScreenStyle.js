@@ -4,14 +4,20 @@ import { StyleSheet } from 'react-native';
 const GoalSetupScreenStyle = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
-  backStep: {
-    marginTop: 40, 
-    marginLeft: 20,
+  globalBack: {
+    // marginTop: 15, 
+    paddingLeft: 25,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    
   },
-  backStepText: {
-    fontSize: 16, 
-    color: 'blue',
+  globalBackText: {
+    fontSize: 25,
+    fontWeight: '600',
+    color: '#333',
   }
 });
 export default GoalSetupScreenStyle
