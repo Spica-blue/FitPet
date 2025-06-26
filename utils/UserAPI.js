@@ -1,7 +1,7 @@
 const SPRING_URL = "http://192.168.100.196:8883";
-// const FASTAPI_URL = "http://192.168.100.190:8883";  
+const FASTAPI_URL = "http://192.168.100.190:8883";  
 // const FASTAPI_URL = "http://172.30.1.22:8883";
-const FASTAPI_URL = "http://192.168.35.137:8883";   
+// const FASTAPI_URL = "http://192.168.35.137:8883";   
 
 const SERVER_URLS = [
   FASTAPI_URL,  // FastAPI (메인)
