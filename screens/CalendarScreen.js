@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Button, ActivityIndicator, AppState, Alert } from 'react-native';
+import { View, Text, Button, ActivityIndicator, AppState, Alert, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,6 +8,8 @@ import { fetchCalendarNote, deleteCalendarNote, fetchAllCalendarNotes } from '..
 import Calendar from '../components/Calendar';
 import styles from "../styles/tab/CalendarScreenStyle";
 
+const { height: screenH } = Dimensions.get('window');
+
 const CalenderScreen = ({ navigation }) => {
   // const [selectedDate, setSelectedDate] = useState(null);
   const [markedDates, setMarkedDates] = useState({});
@@ -15,6 +17,7 @@ const CalenderScreen = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [diary, setDiary] = useState(null);
+  const [workoutSuccess, setWorkoutSuccess] = useState(null);
   const [loadingDiary, setLoadingDiary] = useState(false);
 
   const appState = useRef(AppState.currentState);
@@ -36,12 +39,17 @@ const CalenderScreen = ({ navigation }) => {
     let content = local || '';
     // 2) 서버
     const res = await fetchCalendarNote(email, date);
-    // console.log("res:",res);
+    // console.log("res:",res.data);
+    let success;
     if (res.success && res.data?.note) {
       console.log("일기 조회 성공");
       content = res.data.note;
+      success = res.data.workout_success;
+      // console.log("success:", success);
     }
     setDiary(content);
+    setWorkoutSuccess(success);
+    console.log("workout:", workoutSuccess);
     setLoadingDiary(false);
   };
 
@@ -128,17 +136,17 @@ const CalenderScreen = ({ navigation }) => {
   };
 
   // diary 캐시 삭제
-  // async function clearLocalDiaryCache() {
-  //   // 1) 저장된 모든 키를 가져와서
-  //   const allKeys = await AsyncStorage.getAllKeys();
-  //   // 2) diary- 로 시작하는 키만 필터
-  //   const diaryKeys = allKeys.filter(k => k.startsWith('diary-'));
-  //   if (diaryKeys.length > 0) {
-  //     // 3) 한 번에 제거
-  //     await AsyncStorage.multiRemove(diaryKeys);
-  //     console.log(`로컬 캐시 삭제: ${diaryKeys.join(', ')}`);
-  //   }
-  // }
+  async function clearLocalDiaryCache() {
+    // 1) 저장된 모든 키를 가져와서
+    const allKeys = await AsyncStorage.getAllKeys();
+    // 2) diary- 로 시작하는 키만 필터
+    const diaryKeys = allKeys.filter(k => k.startsWith('diary-'));
+    if (diaryKeys.length > 0) {
+      // 3) 한 번에 제거
+      await AsyncStorage.multiRemove(diaryKeys);
+      console.log(`로컬 캐시 삭제: ${diaryKeys.join(', ')}`);
+    }
+  }
 
   // 앱 활성화 될 때마다 다시 로드
   useEffect(() => {
@@ -230,36 +238,65 @@ const CalenderScreen = ({ navigation }) => {
           </View>
 
           {selectedDate && (
-            <View style={styles.footer}>
-              {loadingDiary ? (
-                <ActivityIndicator />
+            // <View style={styles.footer}>
+              loadingDiary ? (
+                <View style={styles.loaderContainer}>
+                  <ActivityIndicator size="large" color="#007AFF" />
+                </View>
               ) : diary ? (
-                <>
+                <View style={styles.footer}>
                   <Text style={styles.dateLabel}>{selectedDate} 일기</Text>
-                  <Text style={styles.diaryContent}>{diary}</Text>
+                  {/* <Text style={styles.diaryContent}>{diary}</Text> */}
+                  <ScrollView 
+                    style={styles.diaryScroll} 
+                    nestedScrollEnabled
+                    contentContainerStyle={{ padding: 8 }}
+                    // 터치 이벤트 우선권
+                    keyboardShouldPersistTaps="handled"
+                  >
+                    <Text style={styles.diaryContent}>{diary}</Text>
+                  </ScrollView>
+                  <Text style={styles.workoutStatus}>
+                    운동 여부: {workoutSuccess ? "✅ 완료" : "❌ 미완료"}
+                  </Text>
+                  
                   <View style={styles.buttonRow}>
-                    <Button
-                      title="수정"
+                    <TouchableOpacity
+                      style={styles.primaryButton}
                       onPress={() =>
                         navigation.navigate('DiaryEntry', { date: selectedDate })
                       }
-                    />
-                    <Button
-                      title="삭제"
-                      color="red"
+                    >
+                      <Text style={styles.primaryButtonText}>수정</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.secondaryButton}
                       onPress={onDelete}
-                    />
+                    >
+                      <Text style={styles.secondaryButtonText}>삭제</Text>
+                    </TouchableOpacity>
                   </View>
-                </>
+                </View>
               ) : (
-                <Button
-                  title="일기 쓰기"
-                  onPress={() =>
-                    navigation.navigate('DiaryEntry', { date: selectedDate })
-                  }
-                />
-              )}
-            </View>
+                // <Button
+                //   title="일기 쓰기"
+                //   onPress={() =>
+                //     navigation.navigate('DiaryEntry', { date: selectedDate })
+                //   }
+                // />
+                <View style={styles.emptyContainer}>
+                  <TouchableOpacity
+                    style={styles.emptyButton}
+                    onPress={() =>
+                      navigation.navigate('DiaryEntry', { date: selectedDate })
+                    }
+                  >
+                    <Text style={styles.emptyButtonText}>일기 쓰기</Text>
+                  </TouchableOpacity>
+                </View>
+              )
+            // {/* </View> */}
           )}
 
           {/* {selectedDate && (

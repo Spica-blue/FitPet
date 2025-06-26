@@ -13,7 +13,7 @@ const LunchInput = ({ value, onChange }) => {
 
       <TextInput
         style={styles.textInput}
-        placeholder="점심에 먹은 식단을 입력하세요"
+        placeholder="오늘 점심에 드신 식단을 입력하세요"
         multiline
         value={value}
         onChangeText={onChange}

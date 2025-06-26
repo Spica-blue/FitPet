@@ -49,7 +49,7 @@ const DiaryEntryScreen = ({ route, navigation }) => {
     const email = await getEmail();
 
      // 1) 로컬 캐시에도 저장
-    await AsyncStorage.setItem(storageKey, JSON.stringify({ note, workoutSuccess }));
+    // await AsyncStorage.setItem(storageKey, JSON.stringify({ note, workoutSuccess }));
 
     // 2) 서버 저장
     const res = await saveCalendarNote({ email, date, note, workout_success: workoutSuccess });

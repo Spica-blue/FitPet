@@ -2,6 +2,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login, logout, unlink } from "@react-native-kakao/user";
 import { sendUserToServer, deleteUserFromServer } from "../utils/UserAPI";
 
+// 공통: 로컬 캐시 삭제 함수
+const clearLocalDataForEmail = async (email) => {
+  const allKeys = await AsyncStorage.getAllKeys();
+  // 해당 이메일이 포함된 키 전부
+  const emailKeys = allKeys.filter(key => key.includes(email));
+  // 추가로 삭제할 전역 키
+  const globalKeys = ['userInfo', 'loginType'];
+  const keysToRemove = [...new Set([...emailKeys, ...globalKeys])];
+  if (keysToRemove.length) {
+    await AsyncStorage.multiRemove(keysToRemove);
+    console.log('삭제된 로컬 키:', keysToRemove);
+  }
+};
+
 // 로그인 & 사용자 정보 가져오기
 export const kakaoLogin = async () => {
   try{
@@ -68,7 +82,8 @@ export const kakaoUnlink = async () => {
     // 서버에 삭제 요청 보내기
     await deleteUserFromServer(email);
 
-    await AsyncStorage.removeItem("userInfo");
+    // 로컬 캐시 전부 삭제
+    await clearLocalDataForEmail(email);
   } catch (error) {
     console.error("탈퇴 실패:", error);
     throw error;

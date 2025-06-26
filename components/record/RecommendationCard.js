@@ -9,7 +9,7 @@ const RecommendationCard = ({ recommendation }) => {
   // recommendation 자체가 없거나, recommendations 프로퍼티가 없으면 아무것도 렌더링하지 않음
   if(!recommendation || !recommendation.recommendations){
     return(
-      <View style={styles.container}>
+      <View style={styles.recommendationContainer}>
         <MaterialCommunityIcons name="robot" size={36} />
         <Text style={styles.placeholder}>AI 추천 결과가 없습니다.</Text>
       </View>

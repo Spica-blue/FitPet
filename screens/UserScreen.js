@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 import { fetchUserInfoFromServer } from '../utils/UserAPI';
 import styles from "../styles/tab/UserScreenStyle";
 import StepChart from '../components/StepChart';
 
-const screenWidth = Dimensions.get('window').width;
+const { width: screenW } = Dimensions.get('window');
 
 const UserScreen = () => {
   const navigation = useNavigation();
@@ -68,15 +68,27 @@ const UserScreen = () => {
         <View style={styles.statsRow}>
           {/* 식단 타입 */}
           <View style={styles.stat}>
-            <Text style={styles.statIcon}>🍽️식단</Text>
-            <Text style={styles.statLabel}>
+            <View style={styles.statHeader}>
+              <Image
+                source={require('../assets/icons/menu_icon.png')}
+                style={styles.statIcon}
+              />
+              <Text style={styles.statTitle}>식단</Text>
+            </View>
+            <Text style={styles.statValue}>
               {`${serverInfo?.dietType}식단` ?? '일반식단'}
             </Text>
           </View>
 
           {/* 목표 체중 */}
           <View style={styles.stat}>
-            <Text style={styles.statIcon}>🎯목표</Text>
+            <View style={styles.statHeader}>
+              <Image
+                source={require('../assets/icons/goals_icon.png')}
+                style={styles.statIcon}
+              />
+              <Text style={styles.statTitle}>목표</Text>
+            </View>
             <Text style={styles.statValue}>
               {serverInfo?.targetWeight != null
                 ? `${serverInfo?.targetWeight}kg`
@@ -101,18 +113,19 @@ const UserScreen = () => {
       {/* 하단 걸음 차트 */}
       <View style={styles.chartCard}>
         <Text style={styles.chartTitle}>내 걸음 분석</Text>
-        <StepChart />
+        <StepChart width={screenW - 60} />
       </View>
 
       <View style={styles.buttons}>
-        <TouchableOpacity style={styles.outlineBtn} onPress={() => navigation.navigate('GoalSetup')}>
-          <Text>목표 변경</Text>
+        <TouchableOpacity
+          style={[styles.button, styles.outlineBtn]}
+          onPress={() => navigation.navigate('GoalSetup')}>
+          <Text style={styles.outlineBtnText}>목표 변경</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.filledBtn}
-          onPress={() => navigation.navigate('Settings')}
-        >
-          <Text style={{ color: '#fff' }}>설정</Text>
+          style={[styles.button, styles.filledBtn]}
+          onPress={() => navigation.navigate('Settings')}>
+          <Text style={styles.filledBtnText}>설정</Text>
         </TouchableOpacity>
       </View>
 

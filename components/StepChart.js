@@ -9,7 +9,7 @@ import styles from "../styles/StepChartStyle";
 
 const barCount = 7;
 
-export default function StepChart() {
+export default function StepChart({ width: parentWidth }) {
   const [data, setData] = useState(null);
   const [labels, setLabels] = useState([]);
 
@@ -73,18 +73,19 @@ export default function StepChart() {
   }
 
   const maxValue = Math.max(...data, 1);
-  const chartWidth = styles.svg.width;
+  const chartWidth = parentWidth;
+  // console.log("chartwidth:", chartWidth);
   const chartHeight = styles.svg.height;
   const barSpacing = 8;
   const barWidth = (chartWidth - barSpacing * (barCount - 1)) / barCount;
 
   return (
     <View style={styles.container}>
-      <Svg style={styles.svg}>
+      <Svg width={chartWidth} height={styles.svg.height}>
         {data.map((value, i) => {
-          const barHeight = (value / maxValue) * (chartHeight - 40);
+          const barHeight = (value / maxValue) * (chartHeight - 30);
           const x = i * (barWidth + barSpacing);
-          const y = chartHeight - barHeight - 20;
+          const y = chartHeight - barHeight - 16;
 
           return (
             <React.Fragment key={i}>
@@ -94,13 +95,13 @@ export default function StepChart() {
                 width={barWidth}
                 height={barHeight}
                 rx={4}
-                fill={i === data.length - 1 ? '#4A90E2' : '#DDD'}
+                fill={i === barCount - 1 ? '#4A90E2' : '#DDD'}
               />
               <SvgText
                 x={x + barWidth / 2}
-                y={y - 6}
+                y={y - 4}
                 fontSize="12"
-                fill={i === data.length - 1 ? '#4A90E2' : '#666'}
+                fill={i === barCount - 1 ? '#4A90E2' : '#666'}
                 textAnchor="middle"
               >
                 {value.toLocaleString()}
@@ -110,9 +111,17 @@ export default function StepChart() {
         })}
       </Svg>
 
-      <View style={styles.labels}>
+      <View 
+        style={[
+          styles.labels,
+          {
+            width: chartWidth,
+            paddingHorizontal: barSpacing / 2,
+          },
+        ]}
+      >
         {labels.map((lab, i) => (
-          <Text key={i} style={styles.label}>{lab}</Text>
+          <Text key={i} style={[styles.label, { width: barWidth },]}>{lab}</Text>
         ))}
       </View>
 
