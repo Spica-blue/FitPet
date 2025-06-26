@@ -14,10 +14,7 @@
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
-        "env": {
-          "GOOGLE_SERVICES_JSON_PATH": "./google-services.json"
-        }
+        "buildType": "apk"
       },
       "ios": {
         "simulator": true
