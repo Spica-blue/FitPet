@@ -95,7 +95,7 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        마지막으로 식단 계획 선택!{'\n'}식단에 맞는 탄단지 섭취량도 계산해 볼게요
+        마지막으로 식단 계획 선택!{'\n'}식단에 맞게 AI가 추천해줄거에요
       </Text>
 
       {/* 알레르기 입력 영역 */}
@@ -108,19 +108,18 @@ const Step4DietType = ({ data, setData, navigation, onBack }) => {
             value={allergyInput}
             onChangeText={setAllergyInput}
           />
-          <Button title="추가" onPress={handleAddAllergy} />
+          <TouchableOpacity style={styles.addButton} onPress={handleAddAllergy}>
+            <Text style={styles.addButtonText}>추가</Text>
+          </TouchableOpacity>
         </View>
-        {/* {allergy.length > 0 && (
-          <Text style={{ marginTop: 8, fontSize: 14, color: '#333' }}>
-            입력한 알레르기: {allergy.join(', ')}
-          </Text>
-        )} */}
-        <Text>알레르기 목록</Text>
+
+        {/* <Text>알레르기 목록</Text> */}
+        {/* 알레르기 목록 */}
         {allergy.length > 0 && (
           <ScrollView style={styles.allergyList}>
             {allergy.map((item, index) => (
               <View key={index} style={styles.allergyItem}>
-                <Text>{item}</Text>
+                <Text style={styles.allergyText}>{item}</Text>
                 <TouchableOpacity onPress={() => handleRemoveAllergy(item)}>
                   <Text style={styles.removeText}>삭제</Text>
                 </TouchableOpacity>

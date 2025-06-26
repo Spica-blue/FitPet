@@ -132,17 +132,6 @@ const StepStyle = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 10,
-    padding: 8,
-  },
-  backButtonText: {
-    fontSize: 20,
-    color: '#333',
-  },
   dietOption: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -187,6 +176,48 @@ const StepStyle = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 22,
+  },
+
+  /* ── 알레르기 입력 버튼 ── */
+  addButton: {
+    marginLeft: 8,
+    backgroundColor: '#4A90E2',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  /* ── 알레르기 목록 ── */
+  allergyList: {
+    maxHeight: 70,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  allergyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: 6,
+  },
+  allergyText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+  },
+  removeText: {
+    marginLeft: 12,
+    color: '#ff3b30',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
