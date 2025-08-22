@@ -33,4 +33,4 @@
 - 펫 키우기 : 목표 미달 시 캐릭터가 배고파지는 등 게임적 동기부여
 
 # 팀원
-- YesI4m : https://github.com/YesI4m
+- YesI4m(SpringBoot) : https://github.com/YesI4m
